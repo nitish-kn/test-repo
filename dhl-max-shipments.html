@@ -1,0 +1,1671 @@
+<html>
+  <head>
+    <title>FFS Portal - DHL MAX Shipments</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- fontawesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+
+    <!-- bootstrap -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+    <!-- bootstrap select (dropdown) -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+
+    <!-- socketio -->
+    <script
+      src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"
+      integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I="
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- moment.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.21/jquery.csv.min.js"
+      integrity="sha512-Y8iWYJDo6HiTo5xtml1g4QqHtl/PO1w+dmUpQfQSOTqKNsMhExfyPN2ncNAe9JuJUSKzwK/b6oaNPop4MXzkwg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
+      integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+  </head>
+
+  {% include 'header.html' %}
+
+  <body>
+    <style>
+      body {
+        background-color: white;
+        overflow-y: scroll;
+      }
+
+      hr.solid {
+        border-top: 1px solid #bbb;
+      }
+
+      th {
+        position: sticky;
+        top: 0;
+        background: #d6d6d6;
+      }
+
+      th::after {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: 0;
+        height: 2px;
+        width: 100%;
+        background: #d6d6d6;
+      }
+
+      .btn-default {
+        color: #333;
+        background-color: #fff;
+        border-color: #ccc;
+      }
+
+      .input-group-text {
+        min-width: 100px;
+      }
+
+      /* input[type="date"] {
+            position: relative;
+            color: transparent;
+            width: 163px;
+        }
+
+        input[type="date"]:focus {
+            color: transparent;
+            background: transparent;
+        }
+
+        input[type="date"]:before {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            transform: translate(16%, 25%);
+            content: attr(data-date);
+            display: inline-block;
+            color: rgb(73, 80, 87);
+        }
+
+
+        input[type="date"]::-webkit-datetime-edit,
+        input[type="date"]::-webkit-inner-spin-button,
+        input[type="date"]::-webkit-clear-button {
+            display: none;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            top: 25%;
+            right: 5%;
+            color: black;
+            opacity: 1;
+        } */
+
+      .drops {
+        color: #999;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        background-color: #f8f9fa;
+        gap: 1rem;
+        min-width: 160px;
+      }
+    </style>
+
+    <br />
+    <div class="container">
+      <label>
+        <span
+          class="badge badge-warning"
+          style="font-size: x-large; border: 2px solid black"
+          ><b>DHL MAX Shipments</b></span
+        >
+      </label>
+    </div>
+
+    <hr class="container solid" style="margin: 35px auto" />
+
+    <div class="container">
+      <label
+        ><span
+          class="badge badge-warning"
+          style="font-size: large; border: 2px solid black"
+          ><b>Ship by ShippingEasy Filters </b></span
+        ></label
+      >
+    </div>
+
+    <div class="container">
+      <p style="font-style: italic">
+        In this section you can input URLs to ShippingEasy. Upon receiving this
+        URL, this program can obtain filtered orders in ShippingEasy, and create
+        DHL MAX shipments through DHL's API. It will return with labels with
+        packing slips, manifest documents, and tracking numbers
+      </p>
+    </div>
+
+    <div class="container d-flex justify-content-between">
+      <div class="d-flex" style="gap: 1rem">
+        <div class="dropdown">
+          <button
+            class="drops d-flex justify-content-between align-items-center dropdown-toggle btn btn-light"
+            id="filterDropdown"
+            type="button"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            Select a filter
+          </button>
+          <div class="dropdown-menu d-menu" id="filterDropdownSection"></div>
+        </div>
+        <button
+          onclick="processSelectedFilter()"
+          class="process-filter-btn btn btn-primary"
+          disabled
+        >
+          Process Filter
+        </button>
+      </div>
+
+      <button
+        class="add-filter-btn btn btn-primary"
+        onclick="onAddFilterBtnClick()"
+      >
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        Add a Filter
+      </button>
+    </div>
+
+    <form id="filterForm" class="container card my-4 d-none">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Name</span>
+              </div>
+              <input
+                type="text"
+                class="form-control"
+                name="filter_name"
+                required
+              />
+              <div class="invalid-feedback">Please enter a name.</div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text">URL</span>
+              </div>
+              <input
+                type="text"
+                class="form-control"
+                name="filter_url"
+                required
+              />
+              <div class="invalid-feedback">Please enter a url.</div>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col col-md-4">
+          <div class="input-group">
+            <label class="input-group-text" style="min-width: fit-content"
+              >Store</label
+            >
+            <select
+              id="store-select-dhl-max"
+              name="store_name"
+              class="form-control"
+              name="choose"
+              data-size="10"
+              data-dropup-auto="false"
+              title="Select a store..."
+            ></select>
+          </div>
+        </div>
+        </div>
+        <input id="filterIdInput" type="hidden" name="id" />
+
+        <div class="w-100 d-flex justify-content-end mt-2" style="gap: 1rem">
+          <button
+            id="deleteBtn"
+            onclick="deleteFilter(this)"
+            class="btn btn-danger"
+            type="button"
+          >
+            <i class="fa fa-trash" aria-hidden="true"></i> Delete Filter
+          </button>
+          <button class="btn btn-primary" type="submit">
+            <i class="fa fa-refresh" aria-hidden="true"></i> Update Filter
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <form id="addFilterForm" class="container card my-4 d-none">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Name</span>
+              </div>
+              <input
+                type="text"
+                class="form-control"
+                name="filter_name"
+                required
+              />
+              <div class="invalid-feedback">Please enter a name.</div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text">URL</span>
+              </div>
+              <input
+                type="text"
+                class="form-control"
+                name="filter_url"
+                required
+              />
+              <div class="invalid-feedback">Please enter a url.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="w-100 d-flex justify-content-end mt-2" style="gap: 1rem">
+          <button class="btn btn-primary" type="submit">Add</button>
+        </div>
+      </div>
+    </form>
+
+    <div
+      class="loading-continer container"
+      id="filter-loding-box"
+      style="flex-direction: column; padding: 1rem"
+    >
+      <div id="filter-msg-0" style="display: none; gap: 1rem; font-size: 1rem">
+        <div class="msg-status" style="display: grid; place-content: center">
+          <i class="fa fa-spinner fa-spin fa-fw"></i>
+        </div>
+        <div class="msg-txt">Creating labels</div>
+      </div>
+
+      <div id="filter-msg-1" style="display: none; gap: 1rem; font-size: 1rem">
+        <div class="msg-status" style="display: grid; place-content: center">
+          <i class="fa fa-spinner fa-spin fa-fw"></i>
+        </div>
+        <div class="msg-txt">Downloading labels</div>
+      </div>
+
+      <div id="filter-msg-2" style="display: none; gap: 1rem; font-size: 1rem">
+        <div class="msg-status" style="display: grid; place-content: center">
+          <i class="fa fa-spinner fa-spin fa-fw"></i>
+        </div>
+        <div class="msg-txt">Manifesting packages</div>
+      </div>
+
+      <div id="filter-msg-3" style="display: none; gap: 1rem; font-size: 1rem">
+        <div class="msg-status" style="display: grid; place-content: center">
+          <i class="fa fa-spinner fa-spin fa-fw"></i>
+        </div>
+        <div class="msg-txt">Downloading manifest PDF</div>
+      </div>
+
+      <div id="filter-msg-4" style="display: none; gap: 1rem; font-size: 1rem">
+        <div class="msg-status" style="display: grid; place-content: center">
+          <i class="fa fa-spinner fa-spin fa-fw"></i>
+        </div>
+        <div class="msg-txt">
+          Updating database (table: external_dhl_shipments)
+        </div>
+      </div>
+
+      <div id="filter-msg-5" style="display: none; gap: 1rem; font-size: 1rem">
+        <div class="msg-status" style="display: grid; place-content: center">
+          <i class="fa fa-spinner fa-spin fa-fw"></i>
+        </div>
+        <div class="msg-txt">Generating labels with packing slips</div>
+      </div>
+
+      <div id="filter-msg-6" style="display: none; gap: 1rem; font-size: 1rem">
+        <div class="msg-status" style="display: grid; place-content: center">
+          <i class="fa fa-spinner fa-spin fa-fw"></i>
+        </div>
+        <div class="msg-txt">Updating shipment status on ShippingEasy</div>
+      </div>
+    </div>
+
+    <div class="container my-2">
+      <div class="alert alert-danger d-none" role="alert" id="alert-box"></div>
+    </div>
+
+    <hr class="container solid" style="margin: 3px auto 35px auto" />
+
+    <div class="container">
+      <label
+        ><span
+          class="badge badge-warning"
+          style="font-size: large; border: 2px solid black"
+          ><b>Manual Upload </b></span
+        ></label
+      >
+    </div>
+
+    <div class="container">
+      <p style="font-style: italic">
+        This script takes in an order number and store. It will then call the
+        DHL API, create the orders as shipments, and manifest them. It then
+        returns formatted labels, manifest documents, and tracking numbers for
+        the shipments.
+      </p>
+    </div>
+
+    <div class="container">
+      <div class="card">
+        <div class="card-body">
+          <form id="csv-form" class="d-flex m-0 flex-wrap" style="gap: 1.4rem">
+            <div class="d-flex align-items-center" style="gap: 1rem">
+              <label
+                for="csv-file"
+                class="m-0 font-weight-bold"
+                style="white-space: nowrap"
+                >Upload File</label
+              >
+              <input
+                style="height: initial"
+                class="form-control"
+                type="file"
+                id="csv-file"
+                name="csv-file"
+                accept=".csv"
+              />
+            </div>
+
+            <button
+              class="btn btn-primary"
+              type="submit"
+              id="csv-file-submit"
+              disabled
+            >
+              Process DHL MAX Orders
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="container mt-4 mb-2">
+      <b>How to load the file:</b>
+      <br />
+      1. Download
+      <a href="#" onclick="downloadThisCSV()">this CSV file</a> which has the
+      following column headers:
+      <span style="font-style: italic">
+        store name, order number, customer name, address, city, state, country,
+        postal code, email, phone, package description, weight
+      </span>
+      <br />
+      2. Fill in the columns with the information for each package that you want
+      to upload into DHL Max with the following format parameters (important to
+      follow these rules):
+      <br />
+      &emsp;<b>Mandatory columns:</b> store name, order number, address, city,
+      country, postal code, weight &emsp;
+      <ul style="margin: 0">
+        <li>
+          <b>country:</b> Country of consignee. Must be a valid 2-character ISO
+          country code.
+        </li>
+      </ul>
+
+      &emsp;&emsp;Ex: For United States of America - US; Canada - CA
+    </div>
+
+    <div
+      class="loading-continer container"
+      id="loding-box"
+      style="flex-direction: column; padding: 1rem"
+    >
+      <div id="msg-0" style="display: none; gap: 1rem; font-size: 1rem">
+        <div class="msg-status" style="display: grid; place-content: center">
+          <i class="fa fa-spinner fa-spin fa-fw"></i>
+        </div>
+        <div class="msg-txt">Creating labels</div>
+      </div>
+
+      <div id="msg-1" style="display: none; gap: 1rem; font-size: 1rem">
+        <div class="msg-status" style="display: grid; place-content: center">
+          <i class="fa fa-spinner fa-spin fa-fw"></i>
+        </div>
+        <div class="msg-txt">Downloading labels</div>
+      </div>
+
+      <div id="msg-2" style="display: none; gap: 1rem; font-size: 1rem">
+        <div class="msg-status" style="display: grid; place-content: center">
+          <i class="fa fa-spinner fa-spin fa-fw"></i>
+        </div>
+        <div class="msg-txt">Manifesting packages</div>
+      </div>
+
+      <div id="msg-3" style="display: none; gap: 1rem; font-size: 1rem">
+        <div class="msg-status" style="display: grid; place-content: center">
+          <i class="fa fa-spinner fa-spin fa-fw"></i>
+        </div>
+        <div class="msg-txt">Downloading manifest PDF</div>
+      </div>
+
+      <div id="msg-4" style="display: none; gap: 1rem; font-size: 1rem">
+        <div class="msg-status" style="display: grid; place-content: center">
+          <i class="fa fa-spinner fa-spin fa-fw"></i>
+        </div>
+        <div class="msg-txt">
+          Updating database (table: external_dhl_shipments)
+        </div>
+      </div>
+
+      <div id="msg-5" style="display: none; gap: 1rem; font-size: 1rem">
+        <div class="msg-status" style="display: grid; place-content: center">
+          <i class="fa fa-spinner fa-spin fa-fw"></i>
+        </div>
+        <div class="msg-txt">Generating labels with packing slips</div>
+      </div>
+
+      <div id="msg-6" style="display: none; gap: 1rem; font-size: 1rem">
+        <div class="msg-status" style="display: grid; place-content: center">
+          <i class="fa fa-spinner fa-spin fa-fw"></i>
+        </div>
+        <div class="msg-txt">Updating shipment status on ShippingEasy</div>
+      </div>
+    </div>
+
+    <hr class="container solid" style="margin: 3px auto 35px auto" />
+
+    <div class="container">
+      <label
+        ><span
+          class="badge badge-warning"
+          style="font-size: large; border: 2px solid black"
+          ><b>Get Packing Slip for Order </b></span
+        ></label
+      >
+    </div>
+    <div class="container">
+      <p >
+        <b>NOTE</b>: <span style="font-style: italic;color: red;"> The DHL API only allows the retrieval of labels for packages that have been manifested in the last 7 days.</span>
+      </p>
+    </div>
+    <div class="container mt-3 mb-5">
+      <form
+        class="d-flex align-items-center"
+        style="gap: 1rem"
+        id="auto-download-form"
+      >
+        <div class="input-group">
+          <label class="input-group-text" style="min-width: fit-content"
+            >Filter</label
+          >
+          <select
+            id="store-select"
+            name="store_name"
+            class="form-control"
+            name="choose"
+            data-size="12"
+            data-dropup-auto="false"
+            title="Select a filter..."
+          ></select>
+        </div>
+        <div class="input-group">
+          <label class="input-group-text">Shipping Date</label>
+          <input
+            type="date"
+            class="form-control"
+            id="select_date"
+            name="select_date"
+            required
+          />
+        </div>
+        <div class="input-group">
+          <div class="d-flex align-items-center" style="gap: 5px">
+            <i
+              class="fa fa-spinner fa-spin fa-fw d-none"
+              id="auto-downoad-spinner"
+            ></i>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              id="submit_slip_order_button"
+              disabled
+            >
+              Get Packing Slip for Order
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <hr class="container solid" style="margin: 3px auto 35px auto" />
+    <div class="container">
+      <label
+        ><span
+          class="badge badge-warning"
+          style="font-size: large; border: 2px solid black"
+          ><b>Tracking Push</b></span
+        ></label
+      >
+    </div>
+
+    <div class="container mt-3 mb-5">
+      <form
+        class="d-flex align-items-center"
+        style="gap: 1rem"
+        id="tracking-push-form"
+      >
+        <div class="input-group">
+          <label class="input-group-text" style="min-width: fit-content"
+            >Store</label
+          >
+          <select
+            id="store-select-tracking-push"
+            class="form-control"
+            name="store-select-tracking-push"
+            data-size="12"
+            data-dropup-auto="false"
+            title="Select a store..."
+          ></select>
+        </div>
+        <div class="input-group">
+          <label class="input-group-text">Shipping Date</label>
+          <input
+            type="date"
+            class="form-control"
+            id="select_date_tracking_push"
+            name="select_date_tracking_push"
+            required
+          />
+        </div>
+        <div class="input-group">
+          <div class="d-flex align-items-center" style="gap: 5px">
+            <button
+              type="submit"
+              class="btn btn-primary"
+              id="submit-tracking-push-btn"
+              disabled
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+      </form>
+      <div
+        class="row w-100 mb-2"
+        id="tracking-push-loaders-div"
+        style="display: none"
+      >
+        <div class="col">
+          <div class="row">
+            <div class="col input-group-append" style="margin-top: 15px">
+              <div>
+                <div id="tracking-push-loading-box"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 1 -->
+    <div
+      class="modal fade"
+      id="filterShipOrdersModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="filterShipOrdersModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="filterShipOrdersModalLabel">
+              Ship DHL MAX Orders
+            </h5>
+            <button
+              type="button"
+              class="close"
+              onclick="$('#filterShipOrdersModal').modal('hide');"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div id="filter-modal-body" class="modal-body">
+            <div
+              id="filter-modal-msg-0"
+              class="d-flex mb-2"
+              style="gap: 1rem; font-size: 1rem"
+            >
+              <div
+                class="msg-status"
+                style="display: grid; place-content: center"
+              >
+                <i class="fa fa-spinner fa-spin fa-fw"></i>
+              </div>
+              <div class="msg-txt">Getting data from ShippingEasy</div>
+            </div>
+
+            <div
+              id="filter-orders-table"
+              class="table-responsive d-none"
+              style="max-height: 45vh"
+            >
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>STORE</th>
+                    <th>ORDER #</th>
+                    <th>WEIGHT</th>
+                    <th>CITY</th>
+                    <th>STATE</th>
+                    <th>COUNTRY</th>
+                  </tr>
+                </thead>
+                <tbody id="filterTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              id="shipFilteredBtn"
+              onclick="shipFiltered()"
+              type="button"
+              class="btn btn-primary"
+              disabled
+            >
+              <div class="d-flex align-items-center" style="gap: 0.4rem">
+                <div class="d-flex align-items-center justify-content-center">
+                  <i
+                    id="shipBtnIcon"
+                    class="fa fa-spinner fa-spin fa-fw d-none"
+                  ></i>
+                </div>
+                <div>Ship</div>
+              </div>
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="$('#filterShipOrdersModal').modal('hide');"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 2 -->
+    <div
+      class="modal fade"
+      id="proceedWithShipmentModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="proceedWithShipmentModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="proceedWithShipmentModalLabel">
+              Ship DHL MAX Orders
+            </h5>
+            <button
+              type="button"
+              class="close"
+              onclick="$('#proceedWithShipmentModal').modal('hide');"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div id="proceedWithShipmentModalBody" class="modal-body"></div>
+          <div class="modal-footer">
+            <button
+              id="proceedWithShipmentBtn"
+              onclick="proceedWithShipment()"
+              type="button"
+              disabled
+              class="btn btn-primary"
+            >
+              Proceed with shipment
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="$('#proceedWithShipmentModal').modal('hide');"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div
+    class="modal fade"
+    id="shipOrdersModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="shipOrdersModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="shipOrdersModalLabel">
+            Ship DHL MAX Orders
+          </h5>
+          <button
+            type="button"
+            class="close"
+            onclick="$('#shipOrdersModal').modal('hide');"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div id="csv-modal-body" class="modal-body"></div>
+        <div class="modal-footer">
+          <button onclick="ship()" type="button" class="btn btn-primary">
+            Ship
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="$('#shipOrdersModal').modal('hide');"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+    <!-- Section 2 modal 1 -->
+    <div
+      class="modal fade"
+      id="orders-not-found-modal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="shipOrdersModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="shipOrdersModalLabel">
+             Order(s) Not found in database
+            </h5>
+            <button
+              type="button"
+              class="close"
+              onclick="$('#orders-not-found-modal').modal('hide');"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div id="orders-not-found-modal-body" class="modal-body">
+          </div>
+          <div class="modal-footer">
+            <button onclick="continueDhlMax()" type="button" class="btn btn-primary">
+              Continue
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="$('#orders-not-found-modal').modal('hide');"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let filtersName;
+      function getFilters() {
+        $.ajax({
+          url: `/u/{{message.userid}}/dhl-max-shipments-data`,
+          data: {
+            request_for: "get_filters",
+            namespace: "{{ message.namespace | safe }}",
+          },
+          type: "post",
+          dataType: "json",
+          success: function (response) {
+            const { data } = response;
+            filtersName = data;
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Failed, Try again.");
+          },
+        });
+      }
+      getFilters()
+      console.log("stores_name: ------> ",filtersName)
+       window.onload = function () {
+        var today_date_obj = new Date();
+        var today = `${today_date_obj.getFullYear()}-${(today_date_obj.getMonth() + 1).toString().padStart(2, '0')}-${today_date_obj.getDate().toString().padStart(2, '0')}`;
+        var sevenDaysAgo = new Date(today_date_obj);
+        sevenDaysAgo.setDate(today_date_obj.getDate() - 6); 
+        var sevenDaysAgoFormatted = `${sevenDaysAgo.getFullYear()}-${(sevenDaysAgo.getMonth() + 1).toString().padStart(2, '0')}-${sevenDaysAgo.getDate().toString().padStart(2, '0')}`;
+        document.querySelectorAll("#select_date").forEach((element) => {
+          element.setAttribute("max", today);
+          element.setAttribute("min", sevenDaysAgoFormatted);
+          element.value = today
+        });
+      };
+      $("#store-select").selectpicker();
+      $("#store-select-tracking-push").selectpicker();
+      const stores_se_api = JSON.parse(`{{message.stores_se_api | safe}}`);
+      $(document).ready(function () {
+        const options_html = [...stores_se_api].forEach((op) => {
+          $("#store-select-tracking-push").append(
+            new Option(op.name, op.name)
+          );
+        });
+        $("#store-select-tracking-push").selectpicker("refresh");
+        $("#store-select-tracking-push").selectpicker("render");
+      });
+
+      $("#store-select-tracking-push,#select_date_tracking_push").on(
+        "change",
+        function (e) {
+          let date = $("#select_date_tracking_push").val();
+          let store = $("#store-select-tracking-push").val();
+          if (date != "" && store != "") {
+            document.getElementById(
+              "submit-tracking-push-btn"
+            ).disabled = false;
+          } else {
+            document.getElementById("submit-tracking-push-btn").disabled = true;
+          }
+        }
+      );
+      const stores = JSON.parse(`{{message.stores | tojson| safe}}`);
+      $("#store-select,#select_date").on("change", function (e) {
+        let date = $("#select_date").val();
+        let store = $("#store-select").val();
+        if (date != "" && store != "") {
+          document.getElementById("submit_slip_order_button").disabled = false;
+        } else {
+          document.getElementById("submit_slip_order_button").disabled = true;
+        }
+      });
+      $("#auto-download-form").on("submit", function (e) {
+        e.preventDefault();
+
+        const form_data = $(this)
+          .serializeArray()
+          .reduce(
+            function (obj, item) {
+              obj[item.name] = item.value;
+              return obj;
+            },
+            { request_for: "auto_download" }
+          );
+
+        $("#auto-downoad-spinner").removeClass("d-none");
+        $.ajax({
+          url: `/u/{{message.userid}}/dhl-max-shipments-data`,
+          type: "POST",
+          data: form_data,
+          dataType: "json",
+          success: function (response) {
+            $("#auto-downoad-spinner").addClass("d-none");
+            let str = response.data;
+            if (str) {
+              str = window.atob(str);
+              let buffer = new ArrayBuffer(str.length),
+                view = new Uint8Array(buffer);
+              for (let i = 0; i < str.length; i++) {
+                view[i] = str.charCodeAt(i);
+              }
+              saveAs(
+                new Blob([view], { type: "application/x-zip-compressed" }),
+                "DHL MAX Auto Download.zip"
+              );
+            } else if (response.error) {
+              alert(response.error);
+            }
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            $("#auto-downoad-spinner").addClass("d-none");
+          },
+        });
+      });
+
+      $(document).ready(function () {
+        stores.sort((a, b) => a.localeCompare(b));
+        stores.forEach((item) => {
+          // $("#store-select").append(new Option(item, item));
+          $("#store-select-dhl-max").append(new Option(item, item));
+        });
+        filtersName.forEach(({name}) => {
+          $("#store-select").append(new Option(name, name));
+          // $("#store-select-dhl-max").append(new Option(item, item));
+        });
+        $("#store-select").selectpicker("refresh");
+        $("#store-select-dhl-max").selectpicker("refresh");
+      });
+    </script>
+
+    <script>
+      const manualMaxMsgIndex = 6;
+      let manualLastMsgIndex = -1;
+      let dhl_data = [];
+
+      function reset() {
+        manualLastMsgIndex = -1;
+        for (let i = 0; i <= manualMaxMsgIndex; i++) {
+          $("#msg-" + i).css("display", "none");
+          $(`#msg-${i}` + " .msg-status")
+            .empty()
+            .append('<i class="fa fa-spinner fa-spin fa-fw"></i>');
+        }
+        $("#msg-0").css("display", "flex");
+      }
+
+      function update_progress_data() {
+        manualLastMsgIndex += 1;
+
+        for (let i = 0; i <= manualLastMsgIndex; i++) {
+          $("#msg-" + i).css("display", "flex");
+
+          if (i === manualLastMsgIndex) {
+            $(`#msg-${i}` + " .msg-status")
+              .empty()
+              .append(
+                '<i style="margin-left: 5px" class="fa fa-check-circle" aria-hidden="true"></i>'
+              );
+          }
+
+          if (i != manualMaxMsgIndex) {
+            $("#msg-" + (i + 1)).css("display", "flex");
+          }
+        }
+      }
+
+      function download_zip(response) {
+        let str = response.data;
+        if (str) {
+          str = window.atob(str);
+          let buffer = new ArrayBuffer(str.length),
+            view = new Uint8Array(buffer);
+          for (let i = 0; i < str.length; i++) {
+            view[i] = str.charCodeAt(i);
+          }
+          saveAs(
+            new Blob([view], { type: "application/x-zip-compressed" }),
+            "DHL Max Manifested.zip"
+          );
+        }
+      }
+
+      function downloadThisCSV() {
+        const element = document.createElement("a");
+        element.setAttribute(
+          "href",
+          "{{url_for('static', filename='dhl_max_shipment_template.csv')}}"
+        );
+        element.style.display = "none";
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+      }
+
+      function ship() {
+        $("#shipOrdersModal").modal("hide");
+
+        reset();
+
+        $.ajax({
+          url: `/u/{{message.userid}}/dhl-max-shipments-data`,
+          data: {
+            request_for: "ship",
+            namespace: "{{ message.namespace | safe }}",
+            dhl_data: JSON.stringify(dhl_data),
+          },
+          type: "post",
+          dataType: "json",
+          success: function (response) {
+            download_zip(response);
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Failed, Try again.");
+          },
+        });
+      }
+      function continueDhlMax(bin_check = true) {
+        $('#orders-not-found-modal-body').html('')
+        $('#orders-not-found-modal').modal('hide')
+        $.ajax({
+          url: `/u/{{message.userid}}/dhl-max-shipments-data`,
+          data: {
+            request_for: "run_dhl_max_with_no_orders_found",
+            df: JSON.stringify(df),
+            all_pdf_data: JSON.stringify(all_pdf_data),
+            bin_check,
+            namespace: "{{ message.namespace | safe }}",
+          },
+          dataType: "json",
+          type: "post",
+          success: function (response) {
+            df = []
+            all_pdf_data = []
+            missing_data = []
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Failed, Try again.");
+          },
+        });
+      }
+      $("#csv-form").on("submit", (e) => {
+        e.preventDefault();
+        $("#shipOrdersModal").modal("show");
+      });
+      
+      $("#csv-file").on("change", (e) => {
+        if (e.target.files.length > 0) {
+          const file = e.target.files[0];
+          let result = "";
+          let resultObject = {};
+          var fr = new FileReader();
+          fr.onload = receivedText;
+          fr.readAsText(file);
+
+          function receivedText() {
+            result = fr.result;
+            const [col1Key, col2Key] = result
+              .split("\n")[0]
+              .split(",")
+              .slice(0, 2);
+            dhl_data = $.csv.toObjects(result);
+            resultObject = dhl_data.reduce(
+              (acc, curr) => {
+                acc[col1Key].push(curr[col1Key]);
+                acc[col2Key].push(curr[col2Key]);
+                return acc;
+              },
+              {
+                [col1Key]: [],
+                [col2Key]: [],
+              }
+            );
+
+            const uniqueStores = [...new Set(resultObject[col1Key])];
+
+            const storeStr = uniqueStores.length === 1 ? "store" : "stores";
+
+            $("#csv-modal-body").text(
+              `You are about to ship ${resultObject[col1Key].length} orders from ${uniqueStores.length} ${storeStr}. Proceed?`
+            );
+          }
+
+          $("#csv-file-submit").prop("disabled", false);
+        }
+      });
+    </script>
+
+    <script>
+      const makeid = (length = 16) => {
+        var result = "";
+        var characters =
+          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        var charactersLength = characters.length;
+        for (var i = 0; i < length; i++) {
+          result += characters.charAt(
+            Math.floor(Math.random() * charactersLength)
+          );
+        }
+        return result;
+      };
+
+      const randomFloat = (min = 0.5, max = 25) =>
+        Math.random() * (max - min) + min;
+    </script>
+
+    <script>
+      const filterMaxMsgIndex = 6;
+      let filterLastMsgIndex = -1;
+
+      let filters;
+      let selectedFilter;
+      let filterTableRows;
+
+      function getFilters() {
+        $.ajax({
+          url: `/u/{{message.userid}}/dhl-max-shipments-data`,
+          data: {
+            request_for: "get_filters",
+            namespace: "{{ message.namespace | safe }}",
+          },
+          type: "post",
+          dataType: "json",
+          success: function (response) {
+            const { data } = response;
+            filters = data;
+            updateFilterDropdown();
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Failed, Try again.");
+          },
+        });
+      }
+
+      getFilters();
+
+      function onFilterClick(e) {
+        const id = $(e).data("id");
+        selectedFilter = filters.find((f) => f.id === id);
+        console.log(selectedFilter);
+        $("#filterIdInput").val(id);
+        $(".process-filter-btn").prop("disabled", false);
+        $("#filterDropdown").text(selectedFilter.name);
+        $('#filterForm input[name="filter_name"]').val(selectedFilter.name);
+        $('#filterForm input[name="filter_url"]').val(selectedFilter.url);
+        $('#store-select-dhl-max').val(selectedFilter.store_name == null ? '':selectedFilter.store_name );
+        $('#store-select-dhl-max').selectpicker('refresh')
+
+        $("#deleteBtn").data("id", id);
+        $("#addFilterForm").addClass("d-none");
+        $("#filterForm").removeClass("d-none");
+      }
+
+      function deleteFilter(e) {
+        const id = $(e).data("id");
+        $.ajax({
+          url: `/u/{{message.userid}}/dhl-max-shipments-data`,
+          data: {
+            request_for: "delete_filter",
+            id: id,
+            namespace: "{{ message.namespace | safe }}",
+          },
+          dataType: "json",
+          type: "post",
+          success: function (response) {
+            const { data } = response;
+            filters = data;
+            selectedFilter = null;
+            $("#filterDropdown").text("Select a filter");
+            $(".process-filter-btn").prop("disabled", true);
+            updateFilterDropdown();
+            $("#filterForm").addClass("d-none");
+            alert("Filter deleted successfully");
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Failed, Try again.");
+          },
+        });
+      }
+
+      function processSelectedFilter() {
+        if (selectedFilter) {
+          $("#filter-orders-table").addClass("d-none");
+          $("#filter-modal-msg-0 .msg-status")
+            .empty()
+            .append('<i class="fa fa-spinner fa-spin fa-fw"></i>');
+          $("#filter-modal-msg-0 .msg-txt").text(
+            "Getting data from shipping easy"
+          );
+          $("#shipFilteredBtn").prop("disabled", true);
+          if ($("#shipBtnIcon").hasClass("d-flex")) {
+            $("#shipBtnIcon").removeClass("d-flex").addClass("d-none");
+          }
+          $("#filterShipOrdersModal").modal("show");
+
+          $.ajax({
+            url: `/u/{{message.userid}}/dhl-max-shipments-data`,
+            data: {
+              request_for: "ship_filter_modal",
+              url: selectedFilter.url,
+              namespace: "{{ message.namespace | safe }}",
+            },
+            dataType: "json",
+            type: "post",
+            success: function (response) {
+              const { data } = response;
+              if (data.length) {
+                filterTableRows = data;
+                updateFilterTable();
+                $("#filter-orders-table").removeClass("d-none");
+                $("#filter-modal-msg-0 .msg-status")
+                  .empty()
+                  .append(
+                    '<i style="margin-left: 5px" class="fa fa-check-circle" aria-hidden="true"></i>'
+                  );
+                $("#shipFilteredBtn").prop("disabled", false);
+                $("#filter-modal-msg-0 .msg-txt").text(
+                  `${data.length} orders returned from shipping easy (filter: ${selectedFilter.name})`
+                );
+              } else {
+                $("#filter-modal-msg-0 .msg-status")
+                  .empty()
+                  .append(
+                    '<i style="margin-left: 5px" class="fa fa-check-circle" aria-hidden="true"></i>'
+                  );
+                $("#filter-modal-msg-0 .msg-txt").text(
+                  `No records found (filter: ${selectedFilter.name})`
+                );
+              }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+              alert("Failed, Try again.");
+            },
+          });
+        }
+      }
+
+      function updateFilterDropdown() {
+        const filtersDropdownHtml = filters
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map(
+            ({ id, name }) =>
+              `<div class="dropdown-item" data-id="${id}" onclick="onFilterClick(this)">${name}</div>`
+          )
+          .join("");
+        $("#filterDropdownSection").empty().append(filtersDropdownHtml);
+      }
+
+      function updateFilterTable() {
+        const filterTableHtml = filterTableRows
+          .map(
+            ({ store_name, order_number, weight, city, state, country }) =>
+              `<tr>
+                        <td>${store_name}</td>
+                        <td>${order_number}</td>
+                        <td>${weight}</td>
+                        <td>${city}</td>
+                        <td>${state}</td>
+                        <td>${country}</td>
+                    </tr>`
+          )
+          .join("");
+        $("#filterTableBody").empty().append(filterTableHtml);
+      }
+
+      function resetFilter(bin_check) {
+        filterLastMsgIndex = -1;
+        for (let i = 0; i <= filterMaxMsgIndex; i++) {
+          $("#filter-msg-" + i).css("display", "none");
+          $(`#filter-msg--${i}` + " .msg-status")
+            .empty()
+            .append('<i class="fa fa-spinner fa-spin fa-fw"></i>');
+        }
+        if (!bin_check) {
+          $("#filter-msg-0").css("display", "flex");
+        }
+      }
+
+      function update_progress_data_filter(completed, total) {
+        filterLastMsgIndex += 1;
+
+        if ($("#filter-msg-0").css("display") === "none") {
+          $("#filterShipOrdersModal").modal("hide");
+          $("#filter-msg-0").css("display", "flex");
+        }
+
+        const check_html =
+          '<i style="margin-left: 5px" class="fa fa-check-circle" aria-hidden="true"></i>';
+
+        for (let i = 0; i <= filterLastMsgIndex; i++) {
+          if (i >= filterMaxMsgIndex) {
+            const new_text = `${completed}/${total} Updating shipment status on ShippingEasy`;
+            $(`#filter-msg-${filterMaxMsgIndex}` + " .msg-txt").text(new_text);
+
+            if (typeof total === "number" && total === completed) {
+              $(`#filter-msg-${filterMaxMsgIndex}` + " .msg-status")
+                .empty()
+                .append(check_html);
+            }
+          } else {
+            $("#filter-msg-" + i).css("display", "flex");
+            $(`#filter-msg-${i}` + " .msg-status")
+              .empty()
+              .append(check_html);
+
+            let next_index = i + 1;
+
+            if (next_index === filterMaxMsgIndex) {
+              $(`#filter-msg-${filterMaxMsgIndex}` + " .msg-txt").text(
+                `Updating shipment status on ShippingEasy`
+              );
+            }
+
+            $("#filter-msg-" + next_index).css("display", "flex");
+          }
+        }
+      }
+
+      function onNoneBinOrderNumbers(order_numbers) {
+        $("#filterShipOrdersModal").modal("hide");
+        $("#proceedWithShipmentBtn").prop("disabled", false);
+        $("#proceedWithShipmentModalBody").empty().append(`
+                <div>
+                    ${order_numbers.length} orders have missing bins
+                </div>
+                <div>
+                    Order number: ${order_numbers.join(", ")}
+                </div>
+            `);
+        $("#proceedWithShipmentModal").modal("show");
+      }
+
+      function proceedWithShipment() {
+        $("#proceedWithShipmentModal").modal("hide");
+        shipFiltered((bin_check = false));
+      }
+
+      function shipFiltered(bin_check = true) {
+        resetFilter(bin_check);
+        missing_data = [];
+        df = []
+        all_pdf_data = []
+        if (bin_check) {
+          $("#shipBtnIcon").removeClass("d-none").addClass("d-flex");
+        }
+        $('#orders-not-found-modal-body').html('')
+        $.ajax({
+          url: `/u/{{message.userid}}/dhl-max-shipments-data`,
+          data: {
+            request_for: "ship_filter",
+            url: selectedFilter.url,
+            bin_check,
+            namespace: "{{ message.namespace | safe }}",
+          },
+          dataType: "json",
+          type: "post",
+          success: function (response) {
+            if (response.missing_data){
+              missing_data = response.missing_data;
+              df = response.df
+              all_pdf_data = response.all_pdf_data
+              html = `Following orders numbers are not available in database : ${missing_data.join(", ")} ` 
+              $("#filterShipOrdersModal").modal("hide");
+              $('#orders-not-found-modal-body').html(html)
+              $('#orders-not-found-modal').modal('show')
+            }
+            // $('#filter-msg-6 .msg-status').empty().append('<i style="margin-left: 5px" class="fa fa-check-circle" aria-hidden="true"></i>')
+            // download_zip(response)
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Failed, Try again.");
+          },
+        });
+      }
+
+      function onAddFilterBtnClick() {
+        selectedFilter = null;
+        $("#filterDropdown").text("Select a filter");
+        $("#filterForm").addClass("d-none");
+        $("#addFilterForm").removeClass("d-none");
+      }
+
+      $("#addFilterForm").on("submit", function (e) {
+        e.preventDefault();
+        const formData = $(this)
+          .serializeArray()
+          .reduce((acc, { name, value }) => {
+            acc[name] = value;
+            return acc;
+          }, {});
+
+        const newFilter = {
+          name: formData.filter_name,
+          url: formData.filter_url,
+        };
+
+        $.ajax({
+          url: `/u/{{message.userid}}/dhl-max-shipments-data`,
+          data: {
+            request_for: "add_filter",
+            name: formData.filter_name,
+            url: formData.filter_url,
+            namespace: "{{ message.namespace | safe }}",
+          },
+          type: "post",
+          dataType: "json",
+          success: function (response) {
+            const { data } = response;
+            filters = data;
+            updateFilterDropdown();
+            $("#addFilterForm input").val("");
+            alert("Filter added successfully", 1000);
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Failed, Try again.");
+          },
+        });
+      });
+
+      $("#filterForm").on("submit", function (e) {
+        e.preventDefault();
+        const formData = $(this)
+          .serializeArray()
+          .reduce((acc, { name, value }) => {
+            acc[name] = value;
+            return acc;
+          }, {});
+        $.ajax({
+          url: `/u/{{message.userid}}/dhl-max-shipments-data`,
+          data: {
+            request_for: "update_filter",
+            id: formData.id,
+            name: formData.filter_name,
+            url: formData.filter_url,
+            store_name:formData.store_name,
+            namespace: "{{ message.namespace | safe }}",
+          },
+          type: "post",
+          dataType: "json",
+          success: function (response) {
+            const { data } = response;
+            $('#store-select-dhl-max').selectpicker('val','')
+            $('#store-select-dhl-max').selectpicker('refresh')
+            filters = data;
+            updateFilterDropdown();
+            $("#filterDropdown").text(formData.filter_name);
+            alert("Filter updated successfully");
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Failed, Try again.");
+          },
+        });
+      });
+    </script>
+
+    <script>
+      const user_id = parseInt("{{message.userid | safe}}");
+      function checkSessionStatus() {
+        form_data = new FormData();
+        form_data.append("userid", user_id);
+        $.ajax({
+          url: "/check_session_status",
+          method: "POST",
+          contentType: false,
+          processData: false,
+          data: form_data,
+          success: function (response) {
+            if (response.session_expired) {
+              window.location.href = "/login";
+            }
+          },
+        });
+      }
+      setInterval(checkSessionStatus, 10860000);
+      function show_alert(message, type) {
+        $("#alert-box").html(message);
+        if (type === "error") {
+          $("#alert-box").addClass("alert-danger");
+          $("#alert-box").removeClass("alert-success");
+        } else {
+          $("#alert-box").addClass("alert-success");
+          $("#alert-box").removeClass("alert-danger");
+        }
+        $("#alert-box").removeClass("d-none");
+      }
+
+      function show_errors(errors) {
+        if (errors.length > 0) {
+          let message =
+            "Orders that didn't mark as shipped on SE: " + errors.join(", ");
+          show_alert(message, "error");
+        }
+      }
+
+      var socket = io.connect("{{ message.domain | safe }}", {
+        reconnectionDelayMax: 10000,
+        timeout: 200000,
+        autoConnect: true,
+      });
+
+      socket.on("{{ message.namespace | safe }}", function (msg) {
+        const {
+          ship_success,
+          ship_filter_success,
+          none_bin_order_numbers,
+          download_report,
+          completed,
+          total,
+          error_list,
+          message,
+          status,
+          id,
+          label_creation_failed
+        } = msg;
+        if (none_bin_order_numbers) {
+          onNoneBinOrderNumbers(none_bin_order_numbers);
+        }
+        if (ship_success) {
+          update_progress_data();
+        }
+        
+        if (label_creation_failed){
+          alert("Label creation failed for all orders. Please contact administrator") 
+          resetFilter(true);
+
+        }
+
+        if (ship_filter_success) {
+          $("#alert-box").addClass("d-none");
+          update_progress_data_filter(completed, total);
+        }
+
+        if (error_list) {
+          show_errors(error_list);
+        }
+        if (id !== undefined && message !== undefined && status !== undefined) {
+              update_loading_messages(id, message, status);
+        }
+        if (download_report) {
+          $.ajax({
+            url: `/u/{{message.userid}}/dhl-max-shipments-data`,
+            data: {
+              request_for: "download_report",
+              namespace: "{{ message.namespace | safe }}",
+            },
+            dataType: "json",
+            type: "post",
+            success: function (response) {
+              download_zip(response);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+              alert("Failed, Try again.");
+            },
+          });
+        }
+      });
+
+      function update_loading_messages(id, msg, status) {
+        const icon_html =
+          status === "completed"
+            ? '<i style="margin-left: 5px" class="fa fa-check-circle" aria-hidden="true"></i>'
+            : '<i class="fa fa-spinner fa-spin fa-fw"></i>';
+
+        var msg_selector = `#tracking-push-${id}`;
+        var message_html = `
+          <div id="tracking-push-${id}" style="display: flex; gap: 1rem; font-size: 1rem;">
+            <div class="msg-status" style="display: grid; place-content: center;">
+              ${icon_html}
+            </div>
+            <div class="msg-txt">
+              ${msg}
+            </div>
+        </div>
+        `;
+        if ($(msg_selector).length === 0) {
+          $("#tracking-push-loading-box").append(message_html);
+        } else {
+          $(msg_selector).html(message_html);
+        }
+      }
+
+      $("#tracking-push-form").on("submit", function (e) {
+        e.preventDefault();
+        let selected_store = $('#store-select-tracking-push').val()
+        const result = stores_se_api.find(entry => entry.name === selected_store);
+        const form_data = $(this)
+          .serializeArray()
+          .reduce(
+            function (obj, item) {
+              obj[item.name] = item.value;
+              return obj;
+            },
+            { request_for: "tracking_push" ,namespace: "{{message.namespace | safe }}",'store_api_key':result.api_key},
+          );
+
+        $("#tracking-push-loading-box").empty()
+        $('#tracking-push-loaders-div').css('display','flex')
+        $.ajax({
+          url: `/u/{{message.userid}}/dhl-max-shipments-data`,
+          type: "POST",
+          data: form_data,
+          dataType: "json",
+          success: function (response) {
+
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert('Something went wrong while running tracking push')
+          },
+        });
+      });
+    </script>
+  </body>
+</html>

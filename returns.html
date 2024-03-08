@@ -1,0 +1,3399 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>FFS Portal - Returns</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{url_for('static', filename='css/store.css')}}"
+    />
+
+    <!-- fontawesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+
+    <!-- bootstrap -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+    <!-- bootstrap select (dropdown) -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+
+    <!-- socketio -->
+    <script
+      src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"
+      integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I="
+      crossorigin="anonymous"
+    ></script>
+    <link
+      href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js"></script>
+    <script src="https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js"></script>
+    <script>
+      const post_url = "/u/{{message.userid}}/returns_post";
+    </script>
+  </head>
+  {% include 'header.html' %}
+
+  <body style="background-color: whitesmoke">
+    <style>
+      .my-custom-scrollbar {
+        position: relative;
+        height: 400px;
+        overflow: auto;
+      }
+
+      .table-wrapper-scroll-y {
+        display: block;
+      }
+
+      .drops {
+        color: #999;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        background-color: #f8f9fa;
+        gap: 1rem;
+        min-width: 180px;
+      }
+
+      .drops[disabled] {
+        opacity: 0.4;
+        border: 1px solid #ced4da;
+      }
+
+      .modal-xl {
+        width: 90%;
+        max-width: 1200px;
+      }
+
+      body {
+        background-color: white !important;
+      }
+
+      table th {
+        position: sticky;
+        top: 0;
+        /* background: #d6d6d6; */
+        background: #d6d6d6;
+      }
+
+      table th::after {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: 0;
+        height: 2px;
+        width: 100%;
+        background: white;
+      }
+
+      thead th {
+        font-size: initial;
+      }
+
+      hr.solid {
+        border-top: 1px solid #bbb;
+      }
+
+      body {
+        background-color: white;
+      }
+
+      .table td,
+      .table th {
+        vertical-align: initial;
+      }
+
+      input.is-invalid {
+        background-color: #e47171;
+      }
+
+      .sort-icon {
+        cursor: pointer;
+      }
+
+      .custom-file-button input[type="file"] {
+        margin-left: -2px !important;
+      }
+
+      .custom-file-button input[type="file"]::-webkit-file-upload-button {
+        display: none;
+      }
+
+      .custom-file-button input[type="file"]::file-selector-button {
+        display: none;
+      }
+
+      .custom-file-button:hover label {
+        background-color: #dde0e3;
+        cursor: pointer;
+      }
+      .btn-white {
+        background-color: #fff;
+        color: #000;
+      }
+
+      .btn-white.active {
+        background-color: #007bff;
+        color: #fff;
+      }
+      .table-add-return-btn {
+        border: none;
+        padding: 0;
+        border-radius: 4px;
+        outline: none;
+        background: transparent;
+        color: #dc3545;
+        font-size: 1.2rem;
+      }
+      .toggle.cron-status-toggle .toggle-off {
+        color: #333;
+        background-color: #e6e6e6;
+        border-color: #adadad;
+        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+        transition: none;
+      }
+
+      .toggle.cron-status-toggle .toggle-on {
+        transition: none;
+      }
+
+      .toggle.cron-status-toggle .toggle-off {
+        color: #333;
+        background-color: #e6e6e6;
+        border-color: #adadad;
+        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+        transition: none;
+      }
+
+      .btn-default {
+        color: #333;
+        background-color: #fff;
+        border-color: #ccc;
+      }
+      .toggle.cron-status-toggle .toggle-off {
+        color: #333;
+        background-color: #e6e6e6;
+        border-color: #adadad;
+        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+        transition: none;
+      }
+
+      .toggle.cron-status-toggle .toggle-on {
+        transition: none;
+      }
+
+      .toggle.cron-status-toggle .toggle-off {
+        color: #333;
+        background-color: #e6e6e6;
+        border-color: #adadad;
+        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+        transition: none;
+      }
+    </style>
+
+    <br />
+
+    <div class="container">
+      <label
+        ><span
+          class="badge badge-warning"
+          style="font-size: x-large; border: 2px solid black"
+          ><b>Find Returns</b></span
+        ></label
+      >
+    </div>
+
+    <div class="container mt-4">
+      <form id="submit_query_form">
+        <div class="row" style="border-radius: 0px 0px">
+          <div
+            class="btn-group btn-group-toggle mb-3"
+            data-toggle="buttons"
+            id="return_type_change"
+          >
+            <label class="btn btn-secondary btn-white active">
+              <input
+                type="radio"
+                name="trackingStatus"
+                id="NormalReturn"
+                autocomplete="off"
+                checked
+              />
+              Normal return
+            </label>
+            <label class="btn btn-secondary btn-white">
+              <input
+                type="radio"
+                name="trackingStatus"
+                id="ReturnToSender"
+                autocomplete="off"
+              />
+              Return to sender
+            </label>
+          </div>
+          <div class="col-sm-12">
+            <div class="d-flex flex-grow-1 align-items-center" style="gap: 5px">
+              <label
+                for="name"
+                class="m-0 font-weight-bold"
+                style="white-space: nowrap"
+                >Select Store:</label
+              >
+              <select
+                name="store"
+                class="form-control"
+                id="select-store"
+                title="Store Select"
+              >
+                <option value="" disabled selected hidden>Select Store</option>
+              </select>
+            </div>
+          </div>
+          <div class="col" id="return_to_sender_data_div" style="display: none">
+            <div class="row mt-3">
+              <div class="col col-md-6">
+                <div
+                  class="d-flex flex-grow-1 align-items-center"
+                  style="gap: 5px"
+                >
+                  <label
+                    for="updated_by_return_sender"
+                    class="m-0 font-weight-bold"
+                    style="white-space: nowrap"
+                    >Updated By (Name):</label
+                  >
+                  <input type="text" class="form-control" name="updated_by_return_sender_input" id="updated_by_return_sender" />
+                </div>
+              </div>
+            </div>
+            <div class="row mt-2">
+              <div class="col mr-3" style="gap: 5px">
+                <div class="row">
+                  <div class="col">
+                    <label
+                      for="name"
+                      class="font-weight-bold"
+                      style="white-space: nowrap"
+                      >RTS Reason</label
+                    >
+                    <select
+                      name="rts_reason"
+                      id="return_to_senter_rts_reason"
+                      class="form-control"
+                    >
+                      <option value="">Select Reason</option>
+                      <option value="RTS ATTEMPTED NOT KNOWN">
+                        RTS ATTEMPTED NOT KNOWN
+                      </option>
+                      <option value="RTS FORWARD TIME EXPIRED">
+                        RTS FORWARD TIME EXPIRED
+                      </option>
+                      <option value="RTS INCOMPLETE ADDRESS">
+                        RTS INCOMPLETE ADDRESS
+                      </option>
+                      <option value="RTS INSUFFICIENT ADDRESS">
+                        RTS INSUFFICIENT ADDRESS
+                      </option>
+                      <option value="RTS NO MAIL RECEPTACLE">
+                        RTS NO MAIL RECEPTACLE
+                      </option>
+                      <option value="RTS NO SUCH NUMBER">
+                        RTS NO SUCH NUMBER
+                      </option>
+                      <option value="RTS NO SUCH STREET">
+                        RTS NO SUCH STREET
+                      </option>
+                      <option value="RTS REFUSED">RTS REFUSED</option>
+                      <option value="RTS TEMPORARILY AWAY">
+                        RTS TEMPORARILY AWAY
+                      </option>
+                      <option value="RTS UNABLE TO FORWARD">
+                        RTS UNABLE TO FORWARD
+                      </option>
+                      <option value="RTS UNCLAIMED">RTS UNCLAIMED</option>
+                      <option value="RTS VACANT">RTS VACANT</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div class="col d-flex align-items-end">
+                    <input
+                      type="text"
+                      name="rts_reason_other"
+                      id="return_to_sender_rts_reason_other"
+                      class="form-control"
+                      disabled
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Second Column -->
+              <div class="col d-flex flex-column">
+                <div class="row mx-0">
+                  <label
+                    for="name"
+                    class="font-weight-bold"
+                    style="white-space: nowrap"
+                    >Postage</label
+                  >
+                </div>
+                <div class="row d-flex align-items-center" style="gap: 10px">
+                  <div class="col">
+                    <div class="row m-0">
+                      <div
+                        class="d-flex flex-fill align-items-center"
+                        style="gap: 5px"
+                      >
+                        <input
+                          type="radio"
+                          class="sender_postage"
+                          id="postage683"
+                          name="return_to_sender_postage"
+                          value="6.83"
+                        />
+                        <label for="postage713" class="p-0 m-0">$6.83</label>
+                      </div>
+                      <div
+                        class="d-flex flex-fill align-items-center"
+                        style="gap: 5px"
+                      >
+                        <input
+                          type="radio"
+                          id="postage717"
+                          class="sender_postage"
+                          name="return_to_sender_postage"
+                          value="7.17"
+                        />
+                        <label for="postage719" class="p-0 m-0">$7.17</label>
+                      </div>
+                      <div
+                        class="d-flex flex-fill align-items-center"
+                        style="gap: 5px"
+                      >
+                        <input
+                          type="radio"
+                          id="postage740"
+                          class="sender_postage"
+                          name="return_to_sender_postage"
+                          value="7.40"
+                        />
+                        <label for="postage729" class="p-0 m-0">$7.40</label>
+                      </div>
+                      <div
+                        class="d-flex flex-fill align-items-center"
+                        style="gap: 5px"
+                      >
+                        <input
+                          type="radio"
+                          id="postage757"
+                          class="sender_postage"
+                          name="return_to_sender_postage"
+                          value="7.57"
+                        />
+                        <label for="postage729" class="p-0 m-0">$7.57</label>
+                      </div>
+                      <div
+                        class="d-flex flex-fill align-items-center"
+                        style="gap: 5px"
+                      >
+                        <input
+                          type="radio"
+                          id="postageOther"
+                          class="sender_postage"
+                          name="return_to_sender_postage"
+                          value="Other"
+                        />
+                        <label for="postageOther" class="mb-0">Other:</label>
+                        <input
+                          type="text"
+                          id="return_to_sender_postage_postageInput"
+                          name="return_to_sender_postage_postageInput"
+                          class="form-control"
+                          class="sender_postage_other"
+                          placeholder="Enter amount"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-12 my-2">
+            <div class="input-group d-flex" style="gap: 1rem">
+              <div
+                class="d-flex flex-grow-1 align-items-center"
+                style="gap: 5px"
+              >
+                <label
+                  for="name"
+                  class="m-0 font-weight-bold"
+                  style="white-space: nowrap"
+                  >Enter Name:</label
+                >
+                <input type="text" class="form-control" name="name" id="name" />
+              </div>
+              <div
+                class="d-flex flex-grow-1 align-items-center"
+                style="gap: 5px"
+              >
+                <label
+                  for="name"
+                  class="m-0 font-weight-bold"
+                  style="white-space: nowrap"
+                  >Enter Order #:</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  name="order"
+                  id="order"
+                />
+              </div>
+              <div
+                class="d-flex flex-grow-1 align-items-center"
+                style="gap: 5px"
+              >
+                <label
+                  for="name"
+                  class="m-0 font-weight-bold"
+                  style="white-space: nowrap"
+                  >Enter Tracking #:</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  name="tracking"
+                  id="tracking"
+                />
+              </div>
+            </div>
+
+            <div
+              class="d-flex flex-row-reverse mt-2 align-content-center"
+              style="gap: 5px"
+            >
+              <input
+                class="btn btn-primary"
+                type="submit"
+                name="search"
+                id="returns-submit-btn"
+                value="Submit Query"
+              />
+              <div
+                class="loader-container d-none align-items-center"
+                style="display: flex"
+              >
+                <i class="fa fa-spinner fa-spin fa-fw"></i>
+              </div>
+            </div>
+          </div>
+
+          <div id="found_msg_container" class="container d-none">
+            <div id="found_msg" class="alert alert-success" role="alert"></div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <hr class="container solid" />
+
+    <div class="container">
+      <label
+        ><span
+          class="badge badge-warning"
+          style="font-size: large; border: 2px solid black"
+          ><b>Returns Table View/Update</b></span
+        ></label
+      >
+    </div>
+
+    <div class="container my-2">
+      <div class="alert alert-success d-none" role="alert" id="alert-box"></div>
+    </div>
+
+    <div
+      class="container d-flex w-100 align-items-center justify-content-between"
+    >
+      <form
+        id="date-search-form"
+        class="d-flex align-items-center"
+        style="gap: 1rem"
+      >
+        <input type="hidden" name="request_for" value="date_range_search" />
+        <span style="font-weight: bolder">Start Date: </span>
+        <input type="date" name="start_date" />
+        <span style="font-weight: bolder">End Date: </span>
+        <input type="date" name="end_date" />
+
+        <div class="d-flex align-items-center">
+          <i
+            class="fa fa-spinner fa-spin fa-fw d-none"
+            id="date-search-spinner"
+          ></i>
+          <input type="submit" class="btn btn-primary ml-2" value="Search" />
+        </div>
+      </form>
+
+      <div class="d-flex align-items-center" style="gap: 1rem">
+        <button class="btn btn-primary" id="export-csv-btn">
+          <i class="fa fa-download"></i> Export - CSV
+        </button>
+        <button class="btn btn-primary" onclick="$('#manualAdd').modal('show')">
+          <i class="fa fa-plus-circle"></i>
+          <span>Add Manually</span>
+        </button>
+      </div>
+    </div>
+
+    <div
+      class="container mt-3 mb-5"
+      id="return_table_div"
+      style="display: none"
+    >
+      <div class="row">
+        <div class="col-sm-12">
+          <div
+            class="table-responsive"
+            style="max-height: 46vh; overflow: auto"
+          >
+            <table class="table table-light table-striped table-bordered">
+              <thead>
+                <th>
+                  <div
+                    class="d-flex align-items-center justify-content-between"
+                    style="gap: 1rem"
+                  >
+                    <b>Date</b>
+                    <span
+                      class="fa fa-chevron-circle-down sort-icon"
+                      data-colkey="returned_date"
+                    ></span>
+                  </div>
+                </th>
+                <th>
+                  <div
+                    class="d-flex align-items-center justify-content-between"
+                    style="gap: 1rem"
+                  >
+                    <b>Store</b>
+                    <span
+                      class="fa fa-chevron-circle-down sort-icon"
+                      data-colkey="store"
+                    ></span>
+                  </div>
+                </th>
+                <th><b>Order</b></th>
+                <th><b>Tracking Number</b></th>
+                <th>
+                  <div
+                    class="d-flex align-items-center justify-content-between"
+                    style="gap: 1rem"
+                  >
+                    <b>Name</b>
+                    <span
+                      class="fa fa-chevron-circle-down sort-icon"
+                      data-colkey="customer_name"
+                    ></span>
+                  </div>
+                </th>
+                <th><b>Reason</b></th>
+                <th><b>Internal Comments</b></th>
+                <th><b>RTS Reason</b></th>
+                <th><b>Postage</b></th>
+                <th><b>Updated By</b></th>
+                <th><b>Action</b></th>
+              </thead>
+              <tbody id="returns_table_tb"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="container solid mt-3" />
+
+    <div class="container">
+      <label
+        ><span
+          class="badge badge-warning"
+          style="font-size: large; border: 2px solid black"
+          ><b>Return SKUs to SE Inventory</b></span
+        ></label
+      >
+    </div>
+    <div class="container mb-3 w-100 align-items-center">
+      <div class="row w-100">
+        <div class="col-lg-5">
+          <div class="row">
+            <div class="col mt-5">
+              <div class="row m-0 d-flex align-items-center">
+                <button
+                  class="btn btn-primary mt-3"
+                  type="submit"
+                  id="auto_load_to_se_btn"
+                  name="LoadTose"
+                  value="auto_load_to_se_btn"
+                >
+                  Returns SKUs data from DB
+                </button>
+                <div
+                  id="loader-automatic"
+                  style="
+                    display: flex;
+                    gap: 1rem;
+                    font-size: 1rem;
+                    margin-top: 1rem;
+                    margin-left: 1rem;
+                  "
+                >
+                  <div class="msg-status"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col mt-3">
+              <div id="loaders-div" class="mt-3" style="display: none">
+                <div id="loading-box" class="my-2"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-2 d-flex flex-column-reverse justify-content-around">
+          <div
+            class="row"
+            style="
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+              align-items: flex-end;
+            "
+          >
+            <div
+              class="col d-flex w-100 align-items-center flex-column-reverse"
+            >
+              <label
+                for="csv-file"
+                class="m-0 font-weight-bold"
+                style="white-space: nowrap"
+                >OR</label
+              >
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <form id="csv-form" class="d-flex w-100" style="gap: 1.4rem">
+            <div class="d-flex align-items-center" style="gap: 1rem">
+              <label
+                for="csv-file"
+                class="m-0 font-weight-bold"
+                style="white-space: nowrap"
+                >Upload file</label
+              >
+              <div class="input-group custom-file-button">
+                <label class="input-group-text" for="inputGroupFile"
+                  >Choose CSV file</label
+                >
+                <input
+                  type="file"
+                  class="form-control"
+                  id="se_file"
+                  accept=".csv"
+                />
+              </div>
+            </div>
+          </form>
+          <div class="mt-3">
+            <b>How to load the file:</b>
+            <br />
+            1. Download
+            <a href="#" onclick="downloadThisCSV(event)">this CSV file</a>
+            which has the following column headers:
+            <span style="font-style: italic">
+              SKU, Name, Warehouse Bin, Category, stock
+            </span>
+            <br />
+            2. Fill in the columns with the information for each SKU where the
+            user wants to update the inventory on ShippingEasy.
+            <br />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container mt-3">
+      <div
+        class="container mt-3 mb-3"
+        id="auto_return_sku_div"
+        style="display: none"
+      >
+        <div class="row">
+          <div
+            class="table-responsive"
+            style="max-height: 46vh; overflow: auto"
+          >
+            <table class="table table-light table-striped table-bordered">
+              <thead>
+                <th></th>
+                <th>
+                  <div
+                    class="d-flex align-items-center justify-content-between"
+                    style="gap: 1rem"
+                  >
+                    <b>SKU</b>
+                  </div>
+                </th>
+                <th>
+                  <div
+                    class="d-flex align-items-center justify-content-between"
+                    style="gap: 1rem"
+                  >
+                    <b>Name</b>
+                  </div>
+                </th>
+                <th><b>Warehouse bin</b></th>
+                <th>
+                  <div
+                    class="d-flex align-items-center justify-content-between"
+                    style="gap: 1rem"
+                  >
+                    <b>Category</b>
+                  </div>
+                </th>
+                <th><b>Adjust Stock</b></th>
+              </thead>
+              <tbody id="return_sku_to_se_tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container my-3 mb-5">
+      <div
+        id="load-to-se-btn-btn-div"
+        class="d-flex flex-row-reverse"
+        style="width: 100%; gap: 2px"
+      >
+        <button
+          class="btn btn-primary mt-3"
+          type="button"
+          id="load_to_se_btn"
+          name="LoadTose"
+          value="load_to_se_btn"
+          disabled
+          data-bs-toggle="modal"
+          data-bs-target="#confirm-modal"
+        >
+          Load to SE
+        </button>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="confirm-modal"
+      tabindex="-1"
+      aria-labelledby="confirm-modal-label"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="confirm-modal-label">Write to SE</h5>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to upload this file?
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button type="button" class="btn btn-success" id="upload-se-button">
+              Upload
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- manual add modal -->
+    <div
+      class="modal fade"
+      id="manualAdd"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLongTitle"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Add Returns</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form class="px-4" id="manualAddForm">
+              <div class="row">
+                <h6>Store</h6>
+                <select class="form-control" name="store_select"></select>
+              </div>
+              <br />
+              <div class="row">
+                <h6>Order Number</h6>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="manual_order"
+                  placeholder="Enter order number"
+                  id="manaul_order"
+                  required
+                />
+              </div>
+              <div class="row my-2">
+                <div class="col d-flex flex-row-reverse align-items-center p-0">
+                  <button
+                    id="add_sku_to_manual"
+                    type="button"
+                    class="btn btn-primary"
+                    name="add_sku_to_manual"
+                    value="add_sku_to_manual"
+                  >
+                    <i class="fa fa-plus"></i> <span>Add SKU</span>
+                  </button>
+                </div>
+              </div>
+              <div
+                class="row my-2"
+                id="manual_sku_add_table"
+                style="display: none"
+              >
+                <div class="table-responsive" style="max-height: 250px">
+                  <table class="table table-light table-striped table-bordered">
+                    <thead>
+                      <tr>
+                        <th style="z-index: 1">SKU</th>
+                        <th style="white-space: nowrap">SKU Name</th>
+                        <th>Bin</th>
+                        <th style="white-space: nowrap">
+                          <div
+                            class="d-flex align-items-center justify-content-around" style="gap:10px"
+                          >
+                            <span>Good Condition Returned </span
+                            ><i class="fa fa-info-circle good-condition"></i>
+                          </div>
+                        </th>
+                        <th style="white-space: nowrap">
+                          <div
+                            class="d-flex align-items-center justify-content-around" style="gap:10px"
+                          >
+                            <span>Bad Condition Returned</span>
+                            <i class="fa fa-info-circle bad-condition"></i>
+                          </div>
+                        </th>
+                        <th style="white-space: nowrap">Not returned</th>
+                      </tr>
+                    </thead>
+                    <tbody id="manual-search-result-sku-tb"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="row">
+                <h6>Name</h6>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="manual_name"
+                  placeholder="Enter name"
+                  id="manaul_name"
+                  required
+                />
+              </div>
+              <br />
+              <div class="row">
+                <h6>Comments/Products</h6>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="manual_reason"
+                  placeholder="Enter comments"
+                  id="manual_reason"
+                />
+              </div>
+              <br />
+              <div class="row">
+                <div class="col p-0 m-0" style="gap: 5px">
+                  <div class="row p-0">
+                    <div class="col">
+                      <h6>RTS Reason</h6>
+                      <select
+                        name="rts_reason"
+                        id="rts_reason"
+                        class="form-control"
+                      >
+                        <option value="">Select Reason</option>
+                        <option value="RTS ATTEMPTED NOT KNOWN">
+                          RTS ATTEMPTED NOT KNOWN
+                        </option>
+                        <option value="RTS FORWARD TIME EXPIRED">
+                          RTS FORWARD TIME EXPIRED
+                        </option>
+                        <option value="RTS INCOMPLETE ADDRESS">
+                          RTS INCOMPLETE ADDRESS
+                        </option>
+                        <option value="RTS INSUFFICIENT ADDRESS">
+                          RTS INSUFFICIENT ADDRESS
+                        </option>
+                        <option value="RTS NO MAIL RECEPTACLE">
+                          RTS NO MAIL RECEPTACLE
+                        </option>
+                        <option value="RTS NO SUCH NUMBER">
+                          RTS NO SUCH NUMBER
+                        </option>
+                        <option value="RTS NO SUCH STREET">
+                          RTS NO SUCH STREET
+                        </option>
+                        <option value="RTS REFUSED">RTS REFUSED</option>
+                        <option value="RTS TEMPORARILY AWAY">
+                          RTS TEMPORARILY AWAY
+                        </option>
+                        <option value="RTS UNABLE TO FORWARD">
+                          RTS UNABLE TO FORWARD
+                        </option>
+                        <option value="RTS UNCLAIMED">RTS UNCLAIMED</option>
+                        <option value="RTS VACANT">RTS VACANT</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div class="col d-flex align-items-end">
+                      <input
+                        type="text"
+                        name="rts_reason_other"
+                        id="rts_reason_other"
+                        class="form-control"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <br />
+              <div class="row">
+                <div class="col d-flex flex-column">
+                  <div class="row">
+                    <h6>Postage:</h6>
+                  </div>
+                  <div
+                    class="row d-flex align-items-center mt-2"
+                    style="gap: 20px"
+                  >
+                    <div class="">
+                      <input
+                        type="radio"
+                        id="postage713"
+                        name="postage"
+                        value="7.13"
+                      />
+                      <label for="postage713">$7.13</label>
+                    </div>
+                    <div class="">
+                      <input
+                        type="radio"
+                        id="postage719"
+                        name="postage"
+                        value="7.19"
+                      />
+                      <label for="postage719">$7.19</label>
+                    </div>
+                    <div class="">
+                      <input
+                        type="radio"
+                        id="postage729"
+                        name="postage"
+                        value="7.29"
+                      />
+                      <label for="postage729">$7.29</label>
+                    </div>
+                    <div
+                      class="d-flex align-items-center mb-2"
+                      style="gap: 5px"
+                    >
+                      <input
+                        type="radio"
+                        id="postageOther"
+                        name="postage"
+                        value="Other"
+                      />
+                      <label for="postageOther" class="mb-0">Other:</label>
+                      <input
+                        type="text"
+                        id="postageInput"
+                        name="postageInput"
+                        class="form-control"
+                        placeholder="Enter amount"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <br />
+              <div class="row">
+                <h6>Internal Comments:</h6>
+                <br />
+                <textarea
+                  name="internal_comments"
+                  class="form-control"
+                  rows="3"
+                ></textarea>
+              </div>
+              <br />
+              <div class="row">
+                <h6>Initials</h6>
+                <input class="form-control" name="initials" />
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              <i class="fa fa-close"></i> <span>Close</span>
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              name="save"
+              form="manualAddForm"
+              value="save"
+            >
+              <i class="fa fa-save"></i> <span>Save</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- edit return modal -->
+    <div id="edit-return-modal" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-body">
+            <form class="px-4 py-3" id="edit-return-form">
+              <div class="table-responsive" style="max-height: 300px">
+                <table class="table table-light table-striped table-bordered">
+                  <thead>
+                    <tr>
+                      <th>SKU</th>
+                      <th style="white-space: nowrap">SKU Name</th>
+                      <th>Bin</th>
+                      <th style="white-space: nowrap">
+                        <div
+                          class="d-flex align-items-center justify-content-around" style="gap:10px"
+                        >
+                          <span>Good Condition Returned </span
+                          ><i class="fa fa-info-circle good-condition"></i>
+                        </div>
+                      </th>
+                      <th style="white-space: nowrap">
+                        <div
+                          class="d-flex align-items-center justify-content-around" style="gap:10px"
+                        >
+                          <span>Bad Condition Returned</span>
+                          <i class="fa fa-info-circle bad-condition"></i>
+                        </div>
+                      </th>
+                      <th style="white-space: nowrap">Not returned</th>
+                    </tr>
+                  </thead>
+                  <tbody id="edit-return-sku-tb"></tbody>
+                </table>
+              </div>
+
+              <br />
+              <div class="form-group">
+                <label for="reason"
+                  ><span style="font-weight: bolder">Reason</span></label
+                >
+                <textarea
+                  class="form-control"
+                  id="reason"
+                  rows="3"
+                  name="reason"
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <div class="col">
+                  <div class="row">
+                    <div class="col p-0 m-0" style="gap: 5px">
+                      <div class="row p-0">
+                        <div class="col">
+                          <h6>RTS Reason</h6>
+                          <select
+                            name="rts_reason"
+                            id="rts_reason"
+                            class="form-control"
+                          >
+                            <option value="">Select Reason</option>
+                            <option value="RTS ATTEMPTED NOT KNOWN">
+                              RTS ATTEMPTED NOT KNOWN
+                            </option>
+                            <option value="RTS FORWARD TIME EXPIRED">
+                              RTS FORWARD TIME EXPIRED
+                            </option>
+                            <option value="RTS INCOMPLETE ADDRESS">
+                              RTS INCOMPLETE ADDRESS
+                            </option>
+                            <option value="RTS INSUFFICIENT ADDRESS">
+                              RTS INSUFFICIENT ADDRESS
+                            </option>
+                            <option value="RTS NO MAIL RECEPTACLE">
+                              RTS NO MAIL RECEPTACLE
+                            </option>
+                            <option value="RTS NO SUCH NUMBER">
+                              RTS NO SUCH NUMBER
+                            </option>
+                            <option value="RTS NO SUCH STREET">
+                              RTS NO SUCH STREET
+                            </option>
+                            <option value="RTS REFUSED">RTS REFUSED</option>
+                            <option value="RTS TEMPORARILY AWAY">
+                              RTS TEMPORARILY AWAY
+                            </option>
+                            <option value="RTS UNABLE TO FORWARD">
+                              RTS UNABLE TO FORWARD
+                            </option>
+                            <option value="RTS UNCLAIMED">RTS UNCLAIMED</option>
+                            <option value="RTS VACANT">RTS VACANT</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+                        <div class="col d-flex align-items-end">
+                          <input
+                            type="text"
+                            name="rts_reason_other"
+                            id="rts_reason_other"
+                            class="form-control"
+                            disabled
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <br />
+                  <div class="row">
+                    <div class="col d-flex flex-column">
+                      <div class="row">
+                        <h6>Postage:</h6>
+                      </div>
+                      <div
+                        class="row d-flex align-items-center mt-2"
+                        style="gap: 20px"
+                      >
+                        <div class="">
+                          <input
+                            type="radio"
+                            id="postage713"
+                            name="postage"
+                            value="7.13"
+                          />
+                          <label for="postage713">$7.13</label>
+                        </div>
+                        <div class="">
+                          <input
+                            type="radio"
+                            id="postage719"
+                            name="postage"
+                            value="7.19"
+                          />
+                          <label for="postage719">$7.19</label>
+                        </div>
+                        <div class="">
+                          <input
+                            type="radio"
+                            id="postage729"
+                            name="postage"
+                            value="7.29"
+                          />
+                          <label for="postage729">$7.29</label>
+                        </div>
+                        <div
+                          class="d-flex align-items-center mb-2"
+                          style="gap: 5px"
+                        >
+                          <input
+                            type="radio"
+                            id="postageOther"
+                            name="postage"
+                            value="Other"
+                          />
+                          <label for="postageOther" class="mb-0">Other:</label>
+                          <input
+                            type="text"
+                            id="postageInput"
+                            name="postageInput"
+                            class="form-control"
+                            placeholder="Enter amount"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <h6>Internal Comments:</h6>
+                <textarea
+                  name="internal_comments"
+                  class="form-control"
+                  rows="3"
+                ></textarea>
+              </div>
+              <br />
+              <div class="form-group">
+                <label for="initials" style="font-weight: bolder"
+                  >Initials</label
+                >
+                <input class="form-control" name="initials" />
+              </div>
+              <br />
+              <div class="form-group">
+                <label for="initials" style="font-weight: bolder"
+                  >Updated By</label
+                >
+                <input class="form-control" name="updated_by" />
+              </div>
+              <div class="d-flex w-100 flex-row-reverse mt-4">
+                <input
+                  class="btn btn-primary"
+                  value="Save/Update"
+                  name="save"
+                  type="submit"
+                  style="height: 40px; width: 150px"
+                />
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- all result modal -->
+    <div
+      id="all-results-modal-lg"
+      class="modal fade"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="allResultModal"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg modal-xl modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-body">
+            <h4 id="query-result-select-header"></h4>
+            <div
+              class="table-responsive"
+              style="max-height: 80vh; overflow: auto"
+            >
+              <table
+                class="table table-light table-striped table-bordered mt-2"
+              >
+                <thead>
+                  <tr>
+                    <th scope="col">Store</th>
+                    <th scope="col">Order #</th>
+                    <th scope="col">Tracking #</th>
+                    <th scope="col">Ship Date</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">SKU</th>
+                    <th scope="col" style="z-index: 999">Select</th>
+                  </tr>
+                </thead>
+                <tbody id="query-result-select-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="queryResultModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="editReturnsModalTitle"
+      aria-hidden="true"
+      data-keyboard="false"
+      data-backdrop="static"
+    >
+      <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editReturnsModalTitle">Add Returns</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" style="max-height: 60vh; overflow: auto">
+            <div class="row px-4 my-2">
+              <div class="col d-flex align-items-center px-3" style="gap: 10px">
+                <div>Add SKUs to Inventory</div>
+                <input
+                  id="add_sku_to_inventory"
+                  type="checkbox"
+                  data-toggle="toggle"
+                  data-on="YES"
+                  data-off="NO"
+                  data-style="cron-status-toggle"
+                  data-size="small"
+                  data-width="55"
+                  checked
+                />
+              </div>
+              <div class="col d-flex flex-row-reverse align-items-center px-3">
+                <button
+                  id="add_new_return_btn"
+                  type="submit"
+                  class="btn btn-primary"
+                  name="add_new_return"
+                  value="add_new_return"
+                >
+                  <i class="fa fa-plus"></i> <span>Add SKU</span>
+                </button>
+              </div>
+            </div>
+            <form class="px-4" id="search-result-form">
+              <div class="table-responsive" style="max-height: 250px">
+                <table class="table table-light table-striped table-bordered">
+                  <thead>
+                    <tr>
+                      <th>SKU</th>
+                      <th style="white-space: nowrap">SKU Name</th>
+                      <th>Bin</th>
+                      <th style="white-space: nowrap">
+                        <div
+                          class="d-flex align-items-center justify-content-around" style="gap:10px"
+                        >
+                          <span>Good Condition Returned </span
+                          ><i class="fa fa-info-circle good-condition"></i>
+                        </div>
+                      </th>
+                      <th style="white-space: nowrap">
+                        <div
+                          class="d-flex align-items-center justify-content-around" style="gap:10px"
+                        >
+                          <span>Bad Condition Returned</span>
+                          <i class="fa fa-info-circle bad-condition"></i>
+                        </div>
+                      </th>
+                      <th style="white-space: nowrap">Not returned</th>
+                    </tr>
+                  </thead>
+                  <tbody id="search-result-sku-tb"></tbody>
+                </table>
+              </div>
+
+              <div class="row">
+                <h6>Store</h6>
+                <input
+                  class="form-control"
+                  type="text"
+                  name="store_select"
+                  placeholder="Enter store name"
+                />
+              </div>
+              <br />
+              <div class="row">
+                <h6>Order Number</h6>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="manual_order"
+                  placeholder="Enter order number"
+                  required
+                />
+              </div>
+              <br />
+              <div class="row">
+                <h6>Name</h6>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="manual_name"
+                  placeholder="Enter name"
+                  required
+                />
+              </div>
+              <br />
+              <div class="row">
+                <h6>Comments</h6>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="manual_reason"
+                  placeholder="Enter comments"
+                />
+              </div>
+              <br />
+              <div class="row">
+                <div class="col p-0 m-0" style="gap: 5px">
+                  <div class="row p-0">
+                    <div class="col">
+                      <h6>RTS Reason</h6>
+                      <select
+                        name="rts_reason"
+                        id="rts_reason"
+                        class="form-control"
+                      >
+                        <option value="">Select Reason</option>
+                        <option value="RTS ATTEMPTED NOT KNOWN">
+                          RTS ATTEMPTED NOT KNOWN
+                        </option>
+                        <option value="RTS FORWARD TIME EXPIRED">
+                          RTS FORWARD TIME EXPIRED
+                        </option>
+                        <option value="RTS INCOMPLETE ADDRESS">
+                          RTS INCOMPLETE ADDRESS
+                        </option>
+                        <option value="RTS INSUFFICIENT ADDRESS">
+                          RTS INSUFFICIENT ADDRESS
+                        </option>
+                        <option value="RTS NO MAIL RECEPTACLE">
+                          RTS NO MAIL RECEPTACLE
+                        </option>
+                        <option value="RTS NO SUCH NUMBER">
+                          RTS NO SUCH NUMBER
+                        </option>
+                        <option value="RTS NO SUCH STREET">
+                          RTS NO SUCH STREET
+                        </option>
+                        <option value="RTS REFUSED">RTS REFUSED</option>
+                        <option value="RTS TEMPORARILY AWAY">
+                          RTS TEMPORARILY AWAY
+                        </option>
+                        <option value="RTS UNABLE TO FORWARD">
+                          RTS UNABLE TO FORWARD
+                        </option>
+                        <option value="RTS UNCLAIMED">RTS UNCLAIMED</option>
+                        <option value="RTS VACANT">RTS VACANT</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div class="col d-flex align-items-end">
+                      <input
+                        type="text"
+                        name="rts_reason_other"
+                        id="rts_reason_other"
+                        class="form-control"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <br />
+              <div class="row">
+                <div class="col d-flex flex-column">
+                  <div class="row">
+                    <h6>Postage:</h6>
+                  </div>
+                  <div
+                    class="row d-flex align-items-center mt-2"
+                    style="gap: 20px"
+                  >
+                    <div class="">
+                      <input
+                        type="radio"
+                        id="postage713"
+                        name="postage"
+                        value="7.13"
+                      />
+                      <label for="postage713">$7.13</label>
+                    </div>
+                    <div class="">
+                      <input
+                        type="radio"
+                        id="postage719"
+                        name="postage"
+                        value="7.19"
+                      />
+                      <label for="postage719">$7.19</label>
+                    </div>
+                    <div class="">
+                      <input
+                        type="radio"
+                        id="postage729"
+                        name="postage"
+                        value="7.29"
+                      />
+                      <label for="postage729">$7.29</label>
+                    </div>
+                    <div
+                      class="d-flex align-items-center mb-2"
+                      style="gap: 5px"
+                    >
+                      <input
+                        type="radio"
+                        id="postageOther"
+                        name="postage"
+                        value="Other"
+                      />
+                      <label for="postageOther" class="mb-0">Other:</label>
+                      <input
+                        type="text"
+                        id="postageInput"
+                        name="postageInput"
+                        class="form-control"
+                        placeholder="Enter amount"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <br />
+              <div class="row">
+                <h6>Internal Comments:</h6>
+                <br />
+                <textarea
+                  name="internal_comments"
+                  class="form-control"
+                  rows="3"
+                ></textarea>
+              </div>
+              <br />
+              <div class="row">
+                <h6>Tracking Number</h6>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="tracking_number"
+                  placeholder="Enter comments"
+                  readonly
+                />
+              </div>
+              <br />
+              <div class="row">
+                <h6>Initials</h6>
+                <input class="form-control" name="initials" />
+              </div>
+              <div class="row">
+                <h6>Updated By</h6>
+                <input class="form-control" name="updated_by" required />
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              <i class="fa fa-close"></i> <span>Close</span>
+            </button>
+            <button
+              id="add-form-submit-btn"
+              type="submit"
+              class="btn btn-primary"
+              name="update_returns"
+              form="search-result-form"
+              value="update_returns"
+            >
+              <i class="fa fa-save"></i> <span>Save</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      tippy(".good-condition", {
+        content: "This will be added back into inventory",
+        arrow: true,
+        placement: "top",
+        animation: "fade",
+      });
+      tippy(".bad-condition", {
+        content: "This will be disposed of",
+        arrow: true,
+        placement: "top",
+        animation: "fade",
+      });
+      const optionsList = [
+        "RTS ATTEMPTED NOT KNOWN",
+        "RTS ATTEMPTED NOT KNOWN",
+        "RTS FORWARD TIME EXPIRED",
+        "RTS INCOMPLETE ADDRESS",
+        "RTS INSUFFICIENT ADDRESS",
+        "RTS NO MAIL RECEPTACLE",
+        "RTS NO SUCH NUMBER",
+        "RTS NO SUCH STREET",
+        "RTS REFUSED",
+        "RTS TEMPORARILY AWAY",
+        "RTS UNABLE TO FORWARD",
+        "RTS UNCLAIMED",
+        "RTS VACANT",
+      ];
+      let tracking_number = "";
+      let edit_form_index = "";
+      let alert_timeout = null;
+      let date_search_table_data = [];
+      var return_type = "NormalReturn";
+      function show_alert(message, type) {
+        clearTimeout(alert_timeout);
+
+        alert_timeout = setTimeout(() => {
+          $("#alert-box").addClass("d-none");
+        }, 5000);
+
+        $("#alert-box").text(message);
+        if (type === "error") {
+          $("#alert-box").addClass("alert-danger");
+          $("#alert-box").removeClass("alert-success");
+        } else {
+          $("#alert-box").addClass("alert-success");
+          $("#alert-box").removeClass("alert-danger");
+        }
+        $("#alert-box").removeClass("d-none");
+      }
+      $(document).ready(function () {
+        $(".sender_postage").on("click", function (e) {
+          if (!(e.target.value == "Other")) {
+            $("#tracking").focus();
+          } else {
+            $("#return_to_sender_postage_postageInput").focus();
+          }
+        });
+        $("#return_to_sender_postage_postageInput").on("blur", function () {
+          $("#tracking").focus();
+        });
+      });
+    </script>
+
+    <script>
+      const fetchStoreData = async () => {
+        try {
+          let url = "https://admin.flatfeeshipping.com/u/20/returns_post"
+          const response = await fetch(url, {
+            method: "POST",
+            
+          })
+          
+        } catch (error) {
+          
+        }
+      }
+
+
+      $.ajax({
+        url: post_url,
+        type: "POST",
+        data: {
+          request_for: "get_stores",
+        },
+        dataType: "json",
+        success: function (response) {
+          const options_html = ["All Stores", ...response.data.result].map(
+            (op) => {
+              return `<option value="${op}">${op}</option>`;
+            }
+          );
+          $("#select-store").append(options_html);
+
+          if ("store" in response.data) {
+            $("#select-store").val(response.data.store).change();
+          }
+
+          // if ("initials" in response.data) {
+          //   $('input[name="initials"]').val(response.data.initials);
+          // }
+          const options_html2 = response.data.result.map((op) => {
+            return `<option value="${op}">${op}</option>`;
+          });
+          $('#manualAddForm select[name="``_select"]').html(options_html2);
+        },
+      });
+
+      $('#manualAddForm input[name="initials"]').on("keyup", function () {
+        const edit_initials = $(this).val();
+        if (edit_initials.length > 0) {
+          $('#manualAdd button[name="save"]').prop("disabled", false);
+        } else {
+          $('#manualAdd button[name="save"]').prop("disabled", true);
+        }
+      });
+      $("#manualAddForm #rts_reason").on("change", function (e) {
+        value = e.target.value;
+        if (value == "Other") {
+          $("#manualAddForm #rts_reason_other").prop("disabled", false);
+        } else {
+          $("#manualAddForm #rts_reason_other").val("");
+          $("#manualAddForm #rts_reason_other").prop("disabled", true);
+        }
+      });
+      $("#edit-return-form #rts_reason").on("change", function (e) {
+        value = e.target.value;
+        if (value == "Other") {
+          $("#edit-return-form #rts_reason_other").prop("disabled", false);
+        } else {
+          $("#edit-return-form #rts_reason_other").val("");
+          $("#edit-return-form #rts_reason_other").prop("disabled", true);
+        }
+      });
+      $("#search-result-form #rts_reason").on("change", function (e) {
+        value = e.target.value;
+        if (value == "Other") {
+          $("#search-result-form #rts_reason_other").prop("disabled", false);
+        } else {
+          $("#search-result-form #rts_reason_other").val("");
+          $("#search-result-form #rts_reason_other").prop("disabled", true);
+        }
+      });
+
+      $("#manualAddForm").on("submit", function (e) {
+        e.preventDefault();
+        const form_data = $(this)
+          .serializeArray()
+          .reduce(
+            function (obj, item) {
+              if (item.name == "rts_reason") {
+                if (item.value == "Other") {
+                  obj[item.name] = $("#manualAddForm #rts_reason_other").val();
+                } else {
+                  obj[item.name] = item.value;
+                }
+              } else {
+                obj[item.name] = item.value;
+              }
+              return obj;
+            },
+            {
+              request_for: "add_manual_return",
+            }
+          );
+        var table = document.getElementById("manual-search-result-sku-tb");
+        var rows = table.rows;
+        var newData = [];
+        var postage =
+          $('#manualAddForm input[name="postage"]:checked').val() || "";
+        if (postage == "Other") {
+          postage = $('#manualAddForm input[name="postageInput"]').val();
+        }
+        form_data["postage"] = postage;
+        for (var i = 0; i < rows.length; i++) {
+          if (rows[i].getAttribute("data-new") === "true") {
+            var sku = rows[i].cells[0].querySelector("select").value;
+            var returnedOk = rows[i].cells[3].querySelector("input").value;
+            var returnedNotOk = rows[i].cells[4].querySelector("input").value;
+            var notReturned = rows[i].cells[5].querySelector("input").value;
+            newData.push({
+              sku: sku,
+              returnedOk: returnedOk,
+              returnedNotOk: returnedNotOk,
+              notReturned: notReturned,
+            });
+          }
+        }
+        if (newData) {
+          form_data["manual_data"] = JSON.stringify(newData);
+        }
+        $.ajax({
+          url: post_url,
+          type: "POST",
+          data: form_data,
+          dataType: "json",
+          success: function (response) {
+            // if ("initials" in response.data) {
+            //   $('#manualAddForm input[name="initials"]').val(response.data.initials);
+            // }
+            // else{}
+            $('#manualAddForm input[name="manual_order"]').val("");
+            $('#manualAddForm input[name="manual_name"]').val("");
+            $('#manualAddForm input[name="internal_comments"]').val("");
+            $('#manualAddForm input[name="rts_reason"]').val("");
+            $('#manualAddForm input[name="rts_reason_other"]').val("");
+            $('#manualAddForm input[name="manual_reason"]').val("");
+            $('#manualAddForm input[name="postage"]').prop("checked", false);
+            $('#manualAddForm input[name="initials"]').val("");
+
+            if (response.data.status === "ok") {
+              show_alert("Returns added...", "success");
+              $("#manualAdd").modal("hide");
+            } else {
+              show_alert("Failed to add returns...", "error");
+              $("#manualAdd").modal("hide");
+            }
+          },
+
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            show_alert("Failed to add returns...", "error");
+            $("#manualAdd").modal("hide");
+          },
+        });
+      });
+    </script>
+
+    <script>
+      $('#queryResultModal button[data-dismiss="modal"]').on(
+        "click",
+        function () {
+          $("#queryResultModal").modal("hide");
+        }
+      );
+      $('#manualAdd button[data-dismiss="modal"]').on("click", function () {
+        $("#manualAdd").modal("hide");
+      });
+
+      $('#search-result-form input[name="initials"]').on("keyup", function () {
+        const edit_initials = $(this).val();
+        if (edit_initials.length > 0) {
+          $('#queryResultModal button[type="submit"]').prop("disabled", false);
+        } else {
+          $('#queryResultModal button[type="submit"]').prop("disabled", true);
+        }
+      });
+
+      $("#search-result-form").on("submit", function (e) {
+        e.preventDefault();
+
+        const form_data = $(this)
+          .serializeArray()
+          .reduce(
+            function (obj, item) {
+              if (item.name == "rts_reason") {
+                if (item.value == "Other") {
+                  obj[item.name] = $(
+                    "#search-result-form #rts_reason_other"
+                  ).val();
+                } else {
+                  obj[item.name] = item.value;
+                }
+              } else {
+                obj[item.name] = item.value;
+              }
+              return obj;
+            },
+            {
+              request_for: "add_return",
+            }
+          );
+        var postage =
+          $('#search-result-form input[name="postage"]:checked').val() || "";
+        if (postage == "Other") {
+          postage = $('#search-result-form input[name="postageInput"]').val();
+        }
+        form_data["postage"] = postage;
+        var table = document.getElementById("search-result-sku-tb");
+        $('#search-result-form input[name="initials"]').val("");
+        var rows = table.rows;
+        var newData = [];
+        for (var i = 1; i < rows.length; i++) {
+          if (rows[i].getAttribute("data-new") === "true") {
+            var sku = rows[i].cells[0].querySelector("select").value;
+            var returnedOk = rows[i].cells[3].querySelector("input").value;
+            var returnedNotOk = rows[i].cells[4].querySelector("input").value;
+            var notReturned = rows[i].cells[5].querySelector("input").value;
+            newData.push({
+              sku: sku,
+              returnedOk: returnedOk,
+              returnedNotOk: returnedNotOk,
+              notReturned: notReturned,
+            });
+          }
+        }
+        if (newData) {
+          form_data["manual_data"] = JSON.stringify(newData);
+        }
+        form_data["tracking_number"] = tracking_number;
+        push_sku_to_se = $("#add_sku_to_inventory").prop("checked") ? "1" : "0";
+        form_data["mark_return"] = push_sku_to_se;
+        $.ajax({
+          url: post_url,
+          type: "POST",
+          data: form_data,
+          dataType: "json",
+          success: function (response) {
+            $('#search-result-form input[type="text"], textarea').val("");
+
+            if ("initials" in response.data) {
+              $('#search-result-form input[name="initials"]').val(
+                response.data.initials
+              );
+            }
+
+            if (response.data.status === "ok") {
+              show_alert("Returns added...", "success");
+            } else {
+              if (response.data.error) {
+                show_alert(response.data.error, "error");
+              } else {
+                show_alert("Failed to add returns...", "error");
+              }
+            }
+            $("#search-result-form #rts_reason").val("");
+            $("#search-result-form #rts_reason_other").val("");
+            $("#queryResultModal").modal("hide");
+          },
+
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            show_alert("Failed to add returns...", "error");
+            $("#queryResultModal").modal("hide");
+          },
+        });
+      });
+      $("#queryResultModal").on("hidden.bs.modal", function (e) {
+        $("#search-result-form #search-result-sku-tb").empty();
+        $("#search-result-form input[name=store_select]").val("");
+        $("#search-result-form input[name=manual_order]").val("");
+        $("#search-result-form input[name=manual_name]").val("");
+        $("#search-result-form input[name=internal_comments]").val("");
+        $("#search-result-form select[name=rts_reason]").val("");
+        $("#search-result-form input[name=rts_reason_other]").val("");
+        $('#search-result-form input[name="postage"]').prop("checked", false);
+        $('#search-result-form input[name="manual_reason"]').val("");
+        $('#search-result-form input[name="tracking_number"]').val("");
+        $('#search-result-form input[name="initials"]').val("");
+        $('#search-result-form input[name="updated_by"]').val("");
+      });
+      let all_results = [];
+      let original_query_search_result = [];
+
+      function digest_search_result(table_data) {
+        // call only when search result is returned from server
+        const table_rows = [];
+        table_data.forEach((row, i) => {
+          table_rows.push({
+            sku: row.sku,
+            sku_name: row.sku_name,
+            bin: row.bin,
+            nr: row.quantity,
+            ro: 0,
+            rb: 0,
+          });
+        });
+
+        original_query_search_result = table_rows;
+        update_search_result_modal([...table_rows]);
+      }
+
+      function update_search_result_modal(table_data) {
+        let tbody_html = table_data
+          .map((row, index) => {
+            return `
+            <tr>
+                <td>${row.sku}</td>
+                <td>${row.sku_name}</td>
+                <td>${row.bin}</td>
+                <td>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <input type="number" class="search_query_input" min="0" style="max-width: 110px" data-index="${index}" id="ro_${index}" value="${
+              row.ro || ""
+            }" name="input_ro|||${row.sku}|||${index + 1}">
+                    </div>    
+                </td>
+                <td>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <input type="number" class="search_query_input" min="0" style="max-width: 110px" data-index="${index}" id="rb_${index}" value="${
+              row.nr || ""
+            }" name="input_rb|||${row.sku}|||${index + 1}">
+                    </div>
+                </td>
+                <td>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <input disabled type="number" class="search_query_input" min="0" style="max-width: 110px" data-index="${index}" id="nr_${index}" value="0" name="input_nr|||${
+              row.sku
+            }|||${index + 1}" >
+                    </div>
+                </td>
+            </tr>
+            `;
+          })
+          .join("");
+
+        $("#search-result-sku-tb").empty();
+        $("#search-result-sku-tb").html(tbody_html);
+
+        $(".search_query_input").on("input", function () {
+          const index = parseInt($(this).data("index"));
+          const name = $(this).attr("name").split("|||")[0];
+
+          let ro_value = parseInt($(`#ro_${index}`).val()) || 0;
+          let rb_value = parseInt($(`#rb_${index}`).val()) || 0;
+          let nr_value = parseInt($(`#nr_${index}`).val()) || 0;
+          const original_nr = original_query_search_result[index].nr;
+
+          if (name === "input_ro") {
+            nr_value = original_nr - (ro_value + rb_value);
+          }
+
+          if (name === "input_rb") {
+            nr_value = original_nr - (ro_value + rb_value);
+          }
+
+          const total = ro_value + rb_value + nr_value;
+
+          let invalid = total != original_nr || nr_value < 0;
+
+          if (invalid) {
+            $(`#ro_${index}`).addClass("is-invalid");
+            $(`#rb_${index}`).addClass("is-invalid");
+            $(`#nr_${index}`).addClass("is-invalid");
+            // disable submit button
+            $("#add-form-submit-btn").prop("disabled", true);
+            if (nr_value < 0) {
+              $(`#nr_${index}`).val(0);
+            }
+          } else {
+            $("#add-form-submit-btn").prop("disabled", false);
+            $(`#nr_${index}`).val(nr_value);
+            $(`#ro_${index}`).removeClass("is-invalid");
+            $(`#rb_${index}`).removeClass("is-invalid");
+            $(`#nr_${index}`).removeClass("is-invalid");
+          }
+        });
+      }
+
+      function select_result(index) {
+        $(`#select_result_${index}`).removeClass("d-none");
+        $('#search-result-form input[name="postage"]').prop("checked", false);
+        const result = all_results[index];
+
+        tracking_number = result["tracking_number"];
+        $('#search-result-form input[name="store_select"]').val(result.store);
+        $('#search-result-form input[name="manual_order"]').val(
+          result.order_number
+        );
+        $('#search-result-form input[name="manual_name"]').val(result.name);
+        $('#search-result-form input[name="tracking_number"]').val(
+          result.tracking_number
+        );
+
+        const index2 = `${result.store}:${result.order_number}`;
+        ship_date = result["ship_date"];
+
+        $.ajax({
+          url: post_url,
+          type: "POST",
+          data: {
+            request_for: "get_sku_data",
+            sku: result.sku,
+            index2,
+            tracking_number: tracking_number,
+            ship_date: ship_date,
+          },
+          dataType: "json",
+          success: function (response) {
+            const { result } = response.data;
+            digest_search_result(result);
+            $('#submit_query_form input[type="text"]').val("");
+            $("#all-results-modal-lg").modal("hide");
+            $("#queryResultModal").modal("show");
+            $(".loader-container").addClass("d-none");
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            $('#submit_query_form input[type="text"]').val("");
+            $(".loader-container").addClass("d-none");
+            alert("Failed, Try again.");
+          },
+        });
+      }
+      $("#submit_query_form").on("submit", function (e) {
+        e.preventDefault();
+       
+        if($("#return_type_change input[type='radio']:checked").attr("id") == 'ReturnToSender' && $('#updated_by_return_sender').val()== ''){
+          let updated_by_field = document.getElementById('updated_by_return_sender')
+          updated_by_field.setCustomValidity("This field is required")
+          updated_by_field.reportValidity()
+          return
+        }
+        store_skus_data = [];
+        enableAddNewBtn();
+        const formData = $(this)
+          .serializeArray()
+          .reduce(
+            (acc, { name, value }) => {
+              acc[name] = value;
+              return acc;
+            },
+            {
+              request_for: "find_returns",
+            }
+          );
+
+        if (!formData.store) {
+          alert("Please Select a Store");
+          return;
+        }
+
+        if (!formData.name && !formData.order && !formData.tracking) {
+          alert("Please enter at least one search parameter");
+          return;
+        }       
+        $(".loader-container").removeClass("d-none");
+        $("#found_msg_container").addClass("d-none");
+        $.ajax({
+          url: post_url,
+          type: "POST",
+          data: formData,
+          dataType: "json",
+          success: function (response) {
+            const { result } = response.data;
+            all_results = result;
+            if (result.length == 1) {
+              if (result[0].rstatus === "existing") {
+                $('#submit_query_form input[type="text"]').val("");
+                if (formData.name) {
+                  $("#found_msg").text(
+                    `${formData.name} order for ${formData.store} already marked returned.`
+                  );
+                } else if (formData.order) {
+                  $("#found_msg").text(
+                    `Order ${formData.order} for ${formData.store} already marked returned.`
+                  );
+                } else if (formData.tracking) {
+                  $("#found_msg").text(
+                    `Tracking ${formData.tracking} for ${formData.store} already marked returned.`
+                  );
+                }
+                if (return_type == "ReturnToSender") {
+                  $("#return_to_senter_rts_reason").val("");
+                  $("#return_to_sender_rts_reason_other").val("");
+                  document
+                    .querySelectorAll('input[name="return_to_sender_postage"]')
+                    .forEach((e) => {
+                      e.checked = false;
+                    });
+                  $("#return_to_sender_postage_postageInput").val("");
+                }
+                $("#found_msg")
+                  .removeClass("alert-success")
+                  .removeClass("alert-danger");
+                $("#found_msg").addClass("alert-warning");
+                $("#found_msg_container").removeClass("d-none");
+                $(".loader-container").addClass("d-none");
+              } else if (result[0].rstatus === "not_found") {
+                $('#submit_query_form input[type="text"]').val("");
+                if (formData.name) {
+                  $("#found_msg").text(
+                    `${formData.name} order for ${formData.store} not found.`
+                  );
+                } else if (formData.order) {
+                  $("#found_msg").text(
+                    `Order ${formData.order} for ${formData.store} not found.`
+                  );
+                } else if (formData.tracking) {
+                  $("#found_msg").text(
+                    `Tracking ${formData.tracking} for ${formData.store} not found.`
+                  );
+                }
+
+                $("#found_msg")
+                  .removeClass("alert-success")
+                  .removeClass("alert-warning");
+                $("#found_msg").addClass("alert-danger");
+                $("#found_msg_container").removeClass("d-none");
+                $(".loader-container").addClass("d-none");
+              } else if (return_type == "NormalReturn") {
+                select_result(0);
+              } else if (return_type == "ReturnToSender") {
+                enter_return(0);
+              }
+            } else {
+              if (formData.name) {
+                $("#query-result-select-header").text(
+                  `Found ${
+                    result.length
+                  } possible matching orders for Customer: ${formData.name.toUpperCase()}`
+                );
+              } else if (formData.order) {
+                $("#query-result-select-header").text(
+                  `Found ${result.length} possible matching orders for Order: ${formData.order}`
+                );
+              } else if (formData.tracking) {
+                $("#query-result-select-header").text(
+                  `Found ${result.length} possible matching orders for Tracking: ${formData.tracking}`
+                );
+              }
+
+              // update table body using result
+              const tbody = $("#query-result-select-table-body");
+              tbody.empty();
+              let tbody_html = "";
+              result.forEach((r, index) => {
+                tbody_html += `
+                        <tr>
+                            <td>${r.store}</td>
+                            <td>${r.order_number}</td>
+                            <td>${r.tracking_number}</td>
+                            <td>${r.ship_date}</td>
+                            <td>${r.name}</td>
+                            <td>
+                                <div style="height:120px; overflow:auto">
+                                    ${r.sku.replaceAll("|", "<br>")}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex justify-content-center align-items-center" style="gap: 5px; min-width: 100px">
+                                   <i class="fa fa-spinner fa-spin fa-fw d-none" id="select_result_${index}"></i>
+                                   <button class="btn btn-primary" onclick="${
+                                     return_type === "NormalReturn"
+                                       ? "select_result(" + index + ")"
+                                       : "enter_return(" + index + ")"
+                                   }">
+                                      ${
+                                        return_type === "NormalReturn"
+                                          ? "Select"
+                                          : "Enter Return"
+                                      }
+                                   </button>
+                                </div>
+                            </td>
+                        </tr>`;
+              });
+              tbody.html(tbody_html);
+              $("#all-results-modal-lg").modal("show");
+              $(".loader-container").addClass("d-none");
+            }
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            $(".loader-container").addClass("d-none");
+            alert("Failed, Try again.");
+          },
+        });
+      });
+    </script>
+
+    <script>
+      const user_id = parseInt("{{message.userid | safe}}");
+      function checkSessionStatus() {
+        form_data = new FormData();
+        form_data.append("userid", user_id);
+        $.ajax({
+          url: "/check_session_status",
+          method: "POST",
+          contentType: false,
+          processData: false,
+          data: form_data,
+          success: function (response) {
+            if (response.session_expired) {
+              window.location.href = "/login";
+            }
+          },
+        });
+      }
+      setInterval(checkSessionStatus, 10860000);
+      var automatic_se_data = [];
+      var store_skus_data = [];
+      var manual_store_skus_data = [];
+
+      function update_edit_return_modal(modal_data) {
+        $('#edit-return-form input[name="postage"]').prop("checked", false);
+        const tbody_html = modal_data["table_data"]
+          .map((row, index) => {
+            return `
+            <tr>
+                <td>${row.sku}</td>
+                <td>${row.sku_name}</td>
+                <td>${row.bin}</td>
+                <td>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <input type="number" class="search_query_input" min="0" style="max-width: 110px" data-index="${index}" id="ro_edit_${index}" value="${
+              row.ro || ""
+            }" name="input_ro|||${row.sku}|||${index + 1}">
+                    </div>    
+                </td>
+                <td>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <input type="number" class="search_query_input" min='0'  style="max-width: 110px" data-index="${index}" id="rb_edit_${index}" value="${
+              row.rb || ""
+            }" name="input_rb|||${row.sku}|||${index + 1}">
+                    </div>
+                </td>
+                <td>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <input type="number" class="search_query_input" min="0" style="max-width: 110px" data-index="${index}" id="nr_edit_${index}" value="${
+              row.nr || ""
+            }" name="input_nr|||${row.sku}|||${index + 1}" >
+                    </div>
+                </td>
+            </tr>
+            `;
+          })
+          .join("");
+
+        $("#edit-return-sku-tb").empty().html(tbody_html);
+
+        $('#edit-return-form input[name="initials"]').on("keyup", function () {
+          const edit_initials = $(this).val();
+          if (edit_initials.length > 0) {
+            $('#edit-return-form input[type="submit"]').prop("disabled", false);
+          } else {
+            $('#edit-return-form input[type="submit"]').prop("disabled", true);
+          }
+        });
+        $('#edit-return-form input[name="initials"]').val(modal_data.initials);
+        $('#edit-return-form textarea[name="reason"]').val(modal_data.reason);
+        $('#edit-return-form textarea[name="internal_comments"]').val(
+          modal_data.internal_comments
+        );
+
+        if (modal_data.initials !== "") {
+          $('#edit-return-form input[type="submit"]').prop("disabled", false);
+        } else {
+          $('#edit-return-form input[type="submit"]').prop("disabled", true);
+          $('#edit-return-form input[name="initials"]').focus();
+        }
+        if ((modal_data.rts_reason !== "") | (modal_data.rts_reason !== null)) {
+          if (optionsList.includes(modal_data.rts_reason)) {
+            $("#edit-return-form #rts_reason").val(modal_data.rts_reason);
+          } else {
+            $("#edit-return-form #rts_reason").val("Other");
+            $("#edit-return-form #rts_reason_other").val(modal_data.rts_reason);
+            $("#edit-return-form #rts_reason_other").prop("disabled", false);
+          }
+        }
+        if ((modal_data.postage !== "") | (modal_data.postage !== null)) {
+          $("#edit-return-form #postageInput").val("");
+          if (modal_data.postage == "7.13") {
+            $("#edit-return-form #postage713").prop("checked", true);
+          } else if (modal_data.postage == "7.19") {
+            $("#edit-return-form #postage719").prop("checked", true);
+          } else if (modal_data.postage == "7.29") {
+            $("#edit-return-form #postage729").prop("checked", true);
+          } else {
+            $("#edit-return-form #postageOther").prop("checked", true);
+            $("#edit-return-form #postageInput").val(modal_data.postage);
+          }
+          $('#edit-return-form input[name="rts_reason"]').val(
+            modal_data.rts_reason
+          );
+          $('#edit-return-form input[name="updated_by"]').val(
+            modal_data.updated_by
+          );
+        }
+        $("#edit-return-modal").modal("show");
+      }
+
+      function submit_returns_edit_delete_form(form, edit, spinner_elem) {
+        const form_data = $(`#${form}`)
+          .serializeArray()
+          .reduce((acc, curr) => {
+            acc[curr.name] = curr.value;
+            return acc;
+          }, {});
+
+        if (edit) {
+          form_data["request_for"] = "get_edit_return";
+        } else {
+          form_data["request_for"] = "delete_edit_return";
+        }
+
+        $.ajax({
+          url: post_url,
+          method: "POST",
+          data: form_data,
+          dataType: "json",
+          success: function (response) {
+            if ("initials" in response.data) {
+              $('#edit-return-form input[name="initials"]').val(
+                response.data.initials
+              );
+            }
+            if (edit) {
+              edit_form_index = response.data.result.index;
+              update_edit_return_modal(response.data.result);
+              spinner_elem.addClass("d-none");
+            } else {
+              $("#date-search-form").submit();
+            }
+          },
+
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            spinner_elem.addClass("d-none");
+          },
+        });
+      }
+      var sort_on = {};
+      $(".sort-icon").on("click", function (e) {
+        // check for asc or desc
+        let colkey = $(this).data("colkey");
+        let sort_order = $(this).hasClass("fa-chevron-circle-down")
+          ? "asc"
+          : "desc";
+        sort_on = { sort_on_col: colkey, order: sort_order };
+        // sort the data
+        if (sort_order == "asc") {
+          $(this)
+            .removeClass("fa-chevron-circle-down")
+            .addClass("fa-chevron-circle-up");
+          date_search_table_data = date_search_table_data.sort((a, b) => {
+            return a[colkey].localeCompare(b[colkey]);
+          });
+        } else {
+          $(this)
+            .removeClass("fa-chevron-circle-up")
+            .addClass("fa-chevron-circle-down");
+          date_search_table_data = date_search_table_data.sort((b, a) => {
+            return a[colkey].localeCompare(b[colkey]);
+          });
+        }
+
+        create_returns_table(date_search_table_data);
+      });
+
+      function create_returns_table(table_data) {
+        let returns_table_tb_html = "";
+        if (Object.keys(sort_on).length > 0) {
+          if (sort_on["order"] == "asc") {
+            table_data = table_data.sort((a, b) => {
+              return a[sort_on["sort_on_col"]].localeCompare(
+                b[sort_on["sort_on_col"]]
+              );
+            });
+          } else {
+            table_data = table_data.sort((b, a) => {
+              return a[sort_on["sort_on_col"]].localeCompare(
+                b[sort_on["sort_on_col"]]
+              );
+            });
+          }
+        }
+        date_search_table_data = [...table_data];
+        table_data.forEach((row, index) => {
+          let returned_date = row["returned_date"] || "";
+          let store = row["store"] || "";
+          let order_id = row["order_id"] || "";
+          let tracking_number = row["tracking_number"] || "";
+          let customer_name = row["customer_name"] || "";
+          let reason = row["reason"] || "";
+          let rts_reason = row["rts_reason"] || "";
+          let postage = row["postage"] || "";
+          let internal_comments = row["internal_comments"] || "";
+          let updated_by = row["updated_by"] || "";
+          returns_table_tb_html += `
+                <tr>
+                    <form class="d-none edit-delete-form" id="return_table_row_${index}">
+                        <input type="hidden" name="store" value="${
+                          row.store
+                        }" form="return_table_row_${index}">
+                        <input type="hidden" name="order" value="${
+                          row.order_id
+                        }" form="return_table_row_${index}">
+                    </form>
+                    <td style="white-space: nowrap">${returned_date}</td>
+                    <td>${store}</td>
+                    <td>${order_id}</td>
+                    <td>${tracking_number}</td>
+                    <td>${customer_name}</td>
+                    <td>${reason}</td>
+                    <td>${internal_comments}</td>
+                    <td>${rts_reason}</td>
+                    <td>${postage ? "$" + postage.replaceAll("$", "") : ""}</td>
+                    <td>${updated_by}</td>
+                    <td>
+                        <button class="d-flex align-items-center return-edit-btn" form="return_table_row_${index}" type="submit"
+                            style="border: None; color: green; font-size: small; background-color: transparent; gap: 4px">
+                            <i class="fa fa-spinner fa-spin fa-fw d-none"></i>
+                            <i class="fa fa-edit"></i>
+                            <span>Edit</span>
+                        </button>
+                        <button class="d-flex align-items-center mt-1 return-del-btn" type="submit" form="return_table_row_${index}" 
+                            style="border: None; color: red; font-size: small; background-color: transparent; gap: 4px">
+                            <i class="fa fa-spinner fa-spin fa-fw d-none"></i>
+                            <i class="fa fa-trash-o"></i>
+                            <span>Delete</span>
+                        </button>
+                    </td>
+                </tr>`;
+        });
+        $("#return_table_div").css("display", "block");
+        $("#returns_table_tb").empty().html(returns_table_tb_html);
+
+        $(".edit-delete-form").on("submit", function (e) {
+          e.preventDefault();
+        });
+
+        $(".return-edit-btn").on("click", function (e) {
+          const spinner_elem = $(this).children().eq(0);
+          spinner_elem.removeClass("d-none");
+          submit_returns_edit_delete_form(
+            $(this).attr("form"),
+            true,
+            spinner_elem
+          );
+        });
+
+        $(".return-del-btn").on("click", function (e) {
+          const spinner_elem = $(this).children().eq(0);
+          spinner_elem.removeClass("d-none");
+          submit_returns_edit_delete_form(
+            $(this).attr("form"),
+            false,
+            spinner_elem
+          );
+        });
+      }
+
+      $("#edit-return-form").on("submit", function (e) {
+        e.preventDefault();
+
+        const form_data = $(this)
+          .serializeArray()
+          .reduce(
+            (acc, { name, value }) => {
+              if (name == "rts_reason") {
+                if (value == "Other") {
+                  acc[name] = $("#edit-return-form #rts_reason_other").val();
+                } else {
+                  acc[name] = value;
+                }
+              } else {
+                acc[name] = value;
+              }
+              return acc;
+            },
+            {
+              request_for: "update_edit_return",
+              index: edit_form_index,
+            }
+          );
+        var postage =
+          $('#edit-return-form input[name="postage"]:checked').val() || "";
+        if (postage == "Other") {
+          postage = $('#edit-return-form input[name="postageInput"]').val();
+        }
+        form_data["postage"] = postage;
+        $.ajax({
+          url: post_url,
+          method: "POST",
+          data: form_data,
+          dataType: "json",
+          success: function (response) {
+            if ("initials" in response.data) {
+              $('#edit-return-form input[name="initials"]').val(
+                response.initials
+              );
+            }
+
+            if (response.data.status === "ok") {
+              show_alert("Returns updated...", "success");
+              $("#date-search-form").submit();
+            } else {
+              show_alert("Error in updating return...", "error");
+            }
+
+            $("#edit-return-modal").modal("hide");
+          },
+
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            show_alert("Error in updating return...", "error");
+            $("#edit-return-modal").modal("hide");
+          },
+        });
+      });
+
+      $("#date-search-form").on("submit", function (e) {
+        e.preventDefault();
+        $("#date-search-spinner").removeClass("d-none");
+
+        const form_data = $(this)
+          .serializeArray()
+          .reduce((obj, item) => {
+            obj[item.name] = item.value;
+            return obj;
+          }, {});
+
+        form_data["store1"] = $("#select-store").val() || "";
+
+        if (form_data["store1"] === "All Stores") {
+          form_data["store1"] = "All";
+        }
+
+        $.ajax({
+          url: post_url,
+          method: "POST",
+          data: form_data,
+          dataType: "json",
+          success: function (response) {
+            $("#date-search-spinner").addClass("d-none");
+            console.log(response.data.result)
+            create_returns_table(response.data.result);
+          },
+
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            $("#date-search-spinner").addClass("d-none");
+          },
+        });
+      });
+
+      $("#export-csv-btn").on("click", () => {
+        if (date_search_table_data.length > 0) {
+          csvContent =
+            "Date,Store,Order,Tracking Number,Name,Comments,Internal Comments,RTS Reason,Postage,Updated By\r\n";
+
+          for (let row of date_search_table_data) {
+            let returned_date =
+              row["returned_date"]?.replaceAll('"', '""') || "";
+            let rts_reason = row["rts_reason"]?.replaceAll('"', '""') || "";
+            let postage = (row["postage"]?.replaceAll('"', '""') || "").trim();
+            if (postage && postage.charAt(0) !== "$") {
+              postage = "$" + postage;
+            }
+            let store = row["store"]?.replaceAll('"', '""') || "";
+            let order_id = row["order_id"]?.replaceAll('"', '""') || "";
+            let tracking_number =
+              row["tracking_number"]?.replaceAll('"', '""') || "";
+            let customer_name =
+              row["customer_name"]?.replaceAll('"', '""') || "";
+            let reason = row["reason"]?.replaceAll('"', '""') || "";
+            let internal_comments =
+              row["internal_comments"]?.replaceAll('"', '""') || "";
+            let updated_by =
+              row["updated_by"]?.replaceAll('"', '""') || "";  
+            if (tracking_number) {
+              tracking_number = "'" + tracking_number;
+            }
+
+            csvContent +=
+              [
+                '"' + returned_date + '"',
+                '"' + store + '"',
+                '"' + order_id + '"',
+                '"' + tracking_number + '"',
+                '"' + customer_name + '"',
+                '"' + reason + '"',
+                '"' + internal_comments + '"',
+                '"' + rts_reason + '"',
+                '"' + postage + '"',
+                '"' + updated_by + '"',
+              ].join(",") + "\r\n";
+          }
+
+          const blob = new Blob([csvContent], { type: "text/plain" });
+          const a = document.createElement("a");
+          a.setAttribute("download", "returns.csv");
+          a.setAttribute("href", window.URL.createObjectURL(blob));
+          a.click();
+        }
+      });
+
+      function downloadThisCSV(event) {
+        const element = document.createElement("a");
+        element.setAttribute(
+          "href",
+          "{{url_for('static', filename='skus_to_se_inventory.csv')}}"
+        );
+        element.style.display = "none";
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+      }
+      var socket = io.connect("{{ message.domain | safe }}", {
+        reconnectionDelayMax: 10000,
+        timeout: 200000,
+        autoConnect: true,
+      });
+      socket.on("{{ message.namespace | safe }}", function (data) {
+        const { id, msg, status } = data;
+        update_loading_messages(id, msg, status);
+      });
+      function update_loading_messages(id, msg, status, type) {
+        const icon_html =
+          status === "completed"
+            ? '<i style="margin-left: 5px" class="fa fa-check-circle" aria-hidden="true"></i>'
+            : '<i class="fa fa-spinner fa-spin fa-fw"></i>';
+
+        var msg_selector = `#loader-${id}`;
+
+        var message_html = `
+          <div id="loader-${id}" style="display: flex; gap: 1rem; font-size: 1rem;">
+            <div class="msg-status" style="display: grid; place-content: center;">
+              ${icon_html}
+            </div>
+            <div class="msg-txt">
+              ${msg}
+            </div>
+        </div>
+        `;
+        if ($(msg_selector).length === 0) {
+          $("#loading-box").append(message_html);
+        } else {
+          $(msg_selector).html(message_html);
+        }
+      }
+
+      $("#se_file").on("input", function () {
+        files = $("#se_file").prop("files");
+        if (files.length > 0) {
+          automatic_se_data = [];
+          $("#return_sku_to_se_tbody").empty();
+          $("#auto_return_sku_div").css("display", "none");
+          $("#loader-automatic .msg-status").html("");
+          document.getElementById("load_to_se_btn").disabled = false;
+        } else {
+          document.getElementById("load_to_se_btn").disabled = true;
+        }
+      });
+      var auto_status = false;
+      $("#upload-se-button").on("click", function (e) {
+        e.preventDefault();
+        if (auto_status == true) {
+          alert(
+            " 'Returns skus data from db' is running! wait till it is completed."
+          );
+          return;
+        }
+
+        files = $("#se_file").prop("files");
+        if (files && files.length == 0 && automatic_se_data == undefined) {
+          alert("please add input.");
+          return;
+        }
+        form_data = new FormData();
+        if (files.length != 0) {
+          $("#return_sku_to_se_tbody").empty();
+          $("#auto_return_sku_div").css("display", "none");
+          $("#loader-automatic .msg-status").html("");
+          form_data.append("files", files[0]);
+        } else {
+          $("#se_file").val("");
+          rows = $("#return_sku_to_se_tbody").find('input[type="checkbox"]');
+          selected_rows = [...rows]
+            .map((e, i) => {
+              if (e.checked) {
+                return e.value;
+              }
+            })
+            .filter((value) => value !== undefined);
+          const newData = selected_rows.map(
+            (index) => automatic_se_data[index]
+          );
+
+          if (newData.length == 0) {
+            alert("Please select minimum one row");
+            return;
+          }
+          form_data.append("automatic_se_data", JSON.stringify(newData));
+        }
+        form_data.append("request_for", "return_skus_to_se");
+        form_data.append("namespace", "{{ message.namespace}}");
+        $("#loading-box").empty();
+        $("#loaders-div").css("display", "block");
+        var confirmModal = document.getElementById("confirm-modal");
+        var modal = bootstrap.Modal.getInstance(confirmModal);
+        modal.hide();
+        $.ajax({
+          url: post_url,
+          method: "POST",
+          data: form_data,
+          contentType: false,
+          processData: false,
+          success: function (response) {},
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("somethong went wrong.");
+            window.location.reload();
+          },
+        });
+      });
+      var running_icon =
+        '<i style="margin-left: 5px" class="fa fa-spinner fa-spin fa-fw" aria-hidden="true"></i>';
+      var success_icon =
+        '<i style="margin-left: 5px" class="fa fa-check-circle" aria-hidden="true"></i>';
+      var failed_icon =
+        '<i style="margin-left: 5px" class="fa fa-close" aria-hidden="true"></i>';
+      $("#auto_load_to_se_btn").on("click", function (e) {
+        auto_status = true;
+        e.preventDefault();
+        $("#loader-automatic .msg-status").html(running_icon);
+        form_data = new FormData();
+        $("#auto_return_sku_div").css("display", "none");
+        form_data.append("request_for", "auto_fetch_se");
+        form_data.append("namespace", "{{ message.namespace}}");
+        $("#loading-box").empty();
+        $("#loaders-div").css("display", "block");
+        $.ajax({
+          url: post_url,
+          method: "POST",
+          data: form_data,
+          contentType: false,
+          processData: false,
+          success: function (response) {
+            data = JSON.parse(response).data;
+            table_data = data.table_data;
+            auto_status = false;
+            tbody_html = "";
+            automatic_se_data = table_data;
+            $("#auto_return_sku_div").css("display", "block");
+            $("#loader-automatic .msg-status").html(success_icon);
+            document.getElementById("load_to_se_btn").disabled = false;
+            table_data.forEach((r, index) => {
+              tbody_html += `
+                        <tr>
+                            <td class="d-flex align-items-center justify-content-end" style="border:none">
+                                <input class="form-check-input mt-2" type="checkbox" value="${index}" checked style="width:16px;height:18px">
+                            </td>
+                            <td>${r.sku}</td>
+                            <td>${r.name}</td>
+                            <td>${r.warehouse_bin}</td>
+                            <td>${r.category}</td>
+                            <td>${r.stock}</td>
+                        </tr>`;
+            });
+            $("#return_sku_to_se_tbody").empty().html(tbody_html);
+          },
+
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            $("#loader-automatic .msg-status").html(failed_icon);
+            document.getElementById("load_to_se_btn").disabled = true;
+            auto_status = false;
+          },
+        });
+      });
+      $("#add_new_return_btn").on("click", function () {
+        if (store_skus_data.length > 0) {
+          add_new_row(store_skus_data);
+        } else {
+          store = $("#queryResultModal input[name='store_select']").val();
+          form_data = new FormData();
+          form_data.append("store", store);
+          form_data.append("request_for", "get_skus_data");
+          $.ajax({
+            url: post_url,
+            method: "POST",
+            data: form_data,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+              store_skus_data = store_skus_data =
+                JSON.parse(response).data.store_skus_data;
+              if (store_skus_data.length > 0) {
+                add_new_row(store_skus_data);
+              }
+            },
+
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+              $("#loader-automatic .msg-status").html(failed_icon);
+              document.getElementById("load_to_se_btn").disabled = true;
+              auto_status = false;
+            },
+          });
+        }
+      });
+      function add_new_row(store_data) {
+        var addNewBtn = document.getElementById("add_new_return_btn");
+        addNewBtn.disabled = true;
+        let skuArr = [];
+        var table = document.getElementById("search-result-sku-tb");
+        var newRow = table.insertRow(table.length);
+        newRow.setAttribute("data-new", true);
+
+        for (let i = 0; i < table.rows.length; i++) {
+          let cells = table.rows[i].cells;
+          if (cells[0] != undefined) {
+            dropdown = cells[0].querySelector("select");
+            if (dropdown != null) {
+              let selectedOption = dropdown.options[dropdown.selectedIndex];
+              skuArr.push(selectedOption.text);
+            } else {
+              skuArr.push(cells[0].textContent.replace(/\s*\(\d+\)/, ""));
+            }
+          }
+        }
+        var cell1 = newRow.insertCell(0);
+        cell1.style.position = "relative"; // set position of cell to relative
+        cell1.style.maxWidth = "400px";
+        var removeBtn = document.createElement("button");
+        removeBtn.innerHTML = '<i class="fa fa-times"></i>';
+        removeBtn.setAttribute("onclick", "deleteRow(this)");
+        removeBtn.classList.add("table-add-return-btn", "mr-2");
+        cell1.appendChild(removeBtn); // add remove button to cell
+
+        var skuSelect = document.createElement("select");
+        skuSelect.setAttribute(
+          "onchange",
+          "getSkuName(this.value, " + table.rows.length + "); enableAddNewBtn()"
+        );
+        skuSelect.style.maxWidth = "60%";
+        var option = document.createElement("option");
+        option.text = "-- Select SKU --";
+        option.value = "";
+        skuSelect.appendChild(option);
+        cell1.appendChild(skuSelect);
+
+        var skuname = newRow.insertCell(1);
+        skuname.id = "skuName-" + table.rows.length;
+        skuname.innerHTML = "";
+
+        var bin = newRow.insertCell(2);
+        bin.id = "bin-" + table.rows.length;
+        bin.innerHTML = "";
+
+        var cell4 = newRow.insertCell(3);
+        var div4 = document.createElement("div");
+        div4.className = "d-flex justify-content-center align-items-center";
+        var returnedOk = document.createElement("input");
+        returnedOk.classList.add(
+          "d-flex",
+          "justify-content-center",
+          "align-items-center"
+        );
+        returnedOk.type = "number";
+        returnedOk.style.maxWidth = "110px";
+        returnedOk.id = "returnedOk-" + table.rows.length;
+        returnedOk.setAttribute("min", "0");
+        div4.appendChild(returnedOk);
+        cell4.appendChild(div4);
+
+        var cell5 = newRow.insertCell(4);
+        var div5 = document.createElement("div");
+        div5.className = "d-flex justify-content-center align-items-center";
+        var returnedNotOk = document.createElement("input");
+        returnedNotOk.type = "number";
+        returnedNotOk.style.maxWidth = "110px";
+        returnedNotOk.classList.add(
+          "d-flex",
+          "justify-content-center",
+          "align-items-center"
+        );
+        returnedNotOk.id = "returnedNotOk-" + table.rows.length;
+        div5.appendChild(returnedNotOk);
+        returnedNotOk.setAttribute("min", "0");
+        cell5.appendChild(div5);
+
+        var cell6 = newRow.insertCell(5);
+        var div6 = document.createElement("div");
+        div6.className = "d-flex justify-content-center align-items-center";
+        var notReturned = document.createElement("input");
+        notReturned.type = "number";
+        notReturned.style.maxWidth = "110px";
+        notReturned.setAttribute("min", "0");
+        notReturned.classList.add(
+          "d-flex",
+          "justify-content-center",
+          "align-items-center"
+        );
+        notReturned.id = "notReturned-" + table.rows.length;
+        div6.appendChild(notReturned);
+        cell6.appendChild(div6);
+
+        var skus = store_data;
+        for (var i = 0; i < skus.length; i++) {
+          var option = document.createElement("option");
+          if (!skuArr.includes(skus[i]["sku"])) {
+            option.text = `${skus[i]["sku"]} - ${skus[i]["name"]}`;
+            option.value = skus[i]["sku"];
+            skuSelect.appendChild(option);
+          }
+        }
+      }
+      function enableAddNewBtn() {
+        var addNewBtn = document.getElementById("add_new_return_btn");
+        addNewBtn.disabled = false;
+      }
+      function enableAddNewBtnManual() {
+        var addNewBtn = document.getElementById("add_sku_to_manual");
+        addNewBtn.disabled = false;
+      }
+      function deleteRow(btn) {
+        var row = btn.parentNode.parentNode;
+        var rowIndex = row.rowIndex - 1;
+        var table = document.getElementById("search-result-sku-tb");
+        table.deleteRow(rowIndex);
+        enableAddNewBtn();
+      }
+
+      function getBinAndName(sku) {
+        const item = store_skus_data.find((item) => item.sku === sku);
+        if (!item) {
+          return { bin: null, name: null };
+        }
+        return { bin: item.warehouse_bin, name: item.name };
+      }
+      function getSkuName(selectedSku, rowIndex) {
+        var skuNameField = document.getElementById("skuName-" + rowIndex);
+        var skubinField = document.getElementById("bin-" + rowIndex);
+        const { bin, name } = getBinAndName(selectedSku);
+        skuNameField.innerHTML = name;
+        skubinField.innerHTML = bin;
+      }
+      $("#add_sku_to_manual").on("click", function () {
+        if (manual_store_skus_data.length > 0) {
+          add_new_row_manual(manual_store_skus_data);
+        } else {
+          store = $("#manualAddForm select[name='store_select']").val();
+          form_data = new FormData();
+          form_data.append("store", store);
+          form_data.append("request_for", "get_skus_data");
+          $.ajax({
+            url: post_url,
+            method: "POST",
+            data: form_data,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+              manual_store_skus_data =
+                JSON.parse(response).data.store_skus_data;
+              if (manual_store_skus_data.length > 0) {
+                add_new_row_manual(manual_store_skus_data);
+                $("#manual_sku_add_table").css("display", "block");
+              } else {
+                alert("No data for selected store");
+              }
+            },
+
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+              alert("something went wrong.");
+            },
+          });
+        }
+      });
+      function add_new_row_manual(store_data) {
+        var addNewBtn = document.getElementById("add_sku_to_manual");
+        addNewBtn.disabled = true;
+        let skuArr = [];
+        var table = document.getElementById("manual-search-result-sku-tb");
+        var newRow = table.insertRow(table.length);
+        newRow.setAttribute("data-new", true);
+
+        for (let i = 0; i < table.rows.length; i++) {
+          let cells = table.rows[i].cells;
+          if (cells[0] != undefined) {
+            dropdown = cells[0].querySelector("select");
+            if (dropdown != null) {
+              let selectedOption = dropdown.options[dropdown.selectedIndex];
+              skuArr.push(selectedOption.text);
+            } else {
+              skuArr.push(cells[0].textContent.replace(/\s*\(\d+\)/, ""));
+            }
+          }
+        }
+        var cell1 = newRow.insertCell(0);
+        cell1.style.position = "relative"; // set position of cell to relative
+        cell1.style.minWidth = "170px";
+        var removeBtn = document.createElement("button");
+        removeBtn.innerHTML = '<i class="fa fa-times"></i>';
+        removeBtn.setAttribute("onclick", "deleteRowManual(this)");
+        removeBtn.classList.add("table-add-return-btn", "mr-2");
+        cell1.appendChild(removeBtn); // add remove button to cell
+
+        var skuSelect = document.createElement("select");
+        skuSelect.style.maxWidth = "110px";
+        skuSelect.setAttribute(
+          "onchange",
+          "getSkuNameManual(this.value, " +
+            table.rows.length +
+            "); enableAddNewBtnManual()"
+        );
+        var option = document.createElement("option");
+        option.text = "-- Select SKU --";
+        option.value = "";
+
+        skuSelect.appendChild(option);
+        cell1.appendChild(skuSelect);
+
+        var skuname = newRow.insertCell(1);
+        skuname.id = "skuNameManual-" + table.rows.length;
+        skuname.innerHTML = "";
+
+        var bin = newRow.insertCell(2);
+        bin.id = "binManual-" + table.rows.length;
+        bin.innerHTML = "";
+
+        var cell4 = newRow.insertCell(3);
+        var div4 = document.createElement("div");
+        div4.className = "d-flex justify-content-center align-items-center";
+        var returnedOk = document.createElement("input");
+        returnedOk.classList.add(
+          "d-flex",
+          "justify-content-center",
+          "align-items-center"
+        );
+        returnedOk.type = "number";
+        returnedOk.style.maxWidth = "110px";
+        returnedOk.id = "returnedOkManual-" + table.rows.length;
+        returnedOk.setAttribute("min", "0");
+        div4.appendChild(returnedOk);
+        cell4.appendChild(div4);
+
+        var cell5 = newRow.insertCell(4);
+        var div5 = document.createElement("div");
+        div5.className = "d-flex justify-content-center align-items-center";
+        var returnedNotOk = document.createElement("input");
+        returnedNotOk.type = "number";
+        returnedNotOk.style.maxWidth = "110px";
+        returnedNotOk.classList.add(
+          "d-flex",
+          "justify-content-center",
+          "align-items-center"
+        );
+        returnedNotOk.id = "returnedNotOkmanual-" + table.rows.length;
+        div5.appendChild(returnedNotOk);
+        returnedNotOk.setAttribute("min", "0");
+        cell5.appendChild(div5);
+
+        var cell6 = newRow.insertCell(5);
+        var div6 = document.createElement("div");
+        div6.className = "d-flex justify-content-center align-items-center";
+        var notReturned = document.createElement("input");
+        notReturned.type = "number";
+        notReturned.style.maxWidth = "110px";
+        notReturned.setAttribute("min", "0");
+        notReturned.classList.add(
+          "d-flex",
+          "justify-content-center",
+          "align-items-center"
+        );
+        notReturned.id = "notReturnedManual-" + table.rows.length;
+        div6.appendChild(notReturned);
+        cell6.appendChild(div6);
+
+        var skus = store_data;
+        for (var i = 0; i < skus.length; i++) {
+          var option = document.createElement("option");
+          if (!skuArr.includes(skus[i]["sku"])) {
+            option.text = skus[i]["sku"];
+            option.value = skus[i]["sku"];
+            skuSelect.appendChild(option);
+          }
+        }
+      }
+      function deleteRowManual(btn) {
+        var row = btn.parentNode.parentNode;
+        var rowIndex = row.rowIndex - 1;
+        var table = document.getElementById("manual-search-result-sku-tb");
+        table.deleteRow(rowIndex);
+        enableAddNewBtnManual();
+      }
+      function getBinAndNameManual(sku) {
+        const item = manual_store_skus_data.find((item) => item.sku === sku);
+        if (!item) {
+          return { bin: null, name: null };
+        }
+        return { bin: item.warehouse_bin, name: item.name };
+      }
+
+      function getSkuNameManual(selectedSku, rowIndex) {
+        var skuNameField = document.getElementById("skuNameManual-" + rowIndex);
+        var skubinField = document.getElementById("binManual-" + rowIndex);
+        const { bin, name } = getBinAndNameManual(selectedSku);
+        skuNameField.innerHTML = name;
+        skubinField.innerHTML = bin;
+      }
+      $("#manualAddForm select[name='store_select']").on("change", function () {
+        manual_store_skus_data = [];
+        $("#manual-search-result-sku-tb").empty();
+        var addNewBtn = document.getElementById("add_sku_to_manual");
+        addNewBtn.disabled = false;
+      });
+      $("#manualAdd").on("hidden.bs.modal", function () {
+        $('#manualAddForm input[name="manual_order"]').val("");
+        $('#manualAddForm input[name="manual_name"]').val("");
+        $('#manualAddForm input[name="internal_comments"]').val("");
+        $('#manualAddForm select[name="rts_reason"]').val("");
+        $('#manualAddForm input[name="rts_reason_other"]').val("");
+        $('#manualAddForm input[name="manual_reason"]').val("");
+        $('#manualAddForm input[name="postage"]').prop("checked", false);
+        $('#manualAddForm input[name="initials"]').val("");
+        manual_store_skus_data = [];
+        $("#manual-search-res ult-sku-tb").empty();
+
+        var addNewBtn = document.getElementById("add_sku_to_manual");
+        addNewBtn.disabled = false;
+        $("#manual_sku_add_table").css("display", "none ");
+      });
+
+      $("#return_type_change").on("change", function () {
+        selected_value = $(
+          "#return_type_change input[type='radio']:checked"
+        ).attr("id");
+        let updated_by_field = document.getElementById('updated_by_return_sender')
+        updated_by_field.setCustomValidity("")
+        return_type = selected_value;
+        if (selected_value == "NormalReturn") {
+          $("#returns-submit-btn").val("Submit Query");
+          $("#return_to_sender_data_div").css("display", "none");
+        } else if (selected_value == "ReturnToSender") {
+          $("#return_to_sender_data_div").css("display", "block");
+          $("#returns-submit-btn").val("Enter Return");
+        }
+      });
+      function enter_return(index) {
+        $(`#select_result_${index}`).removeClass("d-none");
+        $('#search-result-form input[name="postage"]').prop("checked", false);
+        const initial_data = all_results[index];
+        const index2 = `${initial_data.store}:${initial_data.order_number}`;
+        tracking_number = initial_data["tracking_number"];
+        ship_date = initial_data["ship_date"];
+
+        $.ajax({
+          url: post_url,
+          type: "POST",
+          data: {
+            request_for: "get_sku_data",
+            sku: initial_data.sku,
+            index2,
+            tracking_number: tracking_number,
+            ship_date: ship_date,
+          },
+          dataType: "json",
+          success: function (response) {
+            const { result } = response.data;
+            const table_rows = [];
+            tracking_number = initial_data["tracking_number"];
+            store = initial_data.store;
+            order_number = initial_data.order_number;
+            name = initial_data.name;
+            initials = "";
+            result.forEach((row, i) => {
+              table_rows.push({
+                sku: row.sku,
+                sku_name: row.sku_name,
+                bin: row.bin,
+                nr: row.quantity,
+                ro: 0,
+                rb: 0,
+              });
+            });
+            enter_return_submit(
+              tracking_number,
+              store,
+              name,
+              initial_data.order_number,
+              table_rows,
+              initials
+            );
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {},
+        });
+      }
+      function enter_return_submit(
+        tracking_number,
+        store,
+        name,
+        order_number,
+        table_rows,
+        initials
+      ) {
+        let dataArray = table_rows.map((row, index) => {
+          ro_key = "input_ro|||" + row.sku + "|||" + (index + 1);
+          rb_key = "input_rb|||" + row.sku + "|||" + (index + 1);
+          obj = {};
+          obj[ro_key] = row.nr.toString() || "";
+          obj[rb_key] = row.rb || "";
+          return obj;
+        });
+        const form_data = dataArray.reduce((acc, currentObj) => {
+          for (let key in currentObj) {
+            temp_dict = {};
+            temp_dict[key] = currentObj[key];
+            acc[key] = currentObj[key];
+          }
+          return acc;
+        }, {});
+        rts_reason = "";
+        rts_reason_val = $("#return_to_senter_rts_reason").val();
+        if (rts_reason_val == "Other") {
+          rts_reason = $("#return_to_sender_rts_reason_other").val();
+        } else {
+          rts_reason = rts_reason_val;
+        }
+
+        var postage =
+          $('input[name="return_to_sender_postage"]:checked').val() || "";
+        if (postage == "Other") {
+          postage = $(
+            'input[name="return_to_sender_postage_postageInput"]'
+          ).val();
+        }
+        form_data["internal_comments"] = "";
+        form_data["manual_reason"] = "";
+        form_data["postage"] = postage;
+        form_data["postageInput"] = "";
+        form_data["request_for"] = "add_return";
+        form_data["rts_reason"] = rts_reason;
+        form_data["store_select"] = store;
+        form_data["tracking_number"] = tracking_number;
+        form_data["manual_order"] = order_number;
+        form_data["manual_data"] = "[]";
+        form_data["manual_name"] = name;
+        form_data["initials"] = initials;
+        form_data["updated_by"] = $('#updated_by_return_sender').val()
+        $.ajax({
+          url: post_url,
+          type: "POST",
+          data: form_data,
+          dataType: "json",
+          success: function (response) {
+            $('#submit_query_form input[type="text"]').val("");
+            if (response.data.status === "ok") {
+              show_alert("Returns added...", "success");
+            } else {
+              if (response.data.error) {
+                show_alert(response.data.error, "error");
+              } else {
+                show_alert("Failed to add returns...", "error");
+              }
+            }
+            $("#all-results-modal-lg").modal("hide");
+            $(".loader-container").addClass("d-none");
+            $("#return_to_senter_rts_reason").val("");
+            $("#return_to_sender_rts_reason_other").val("");
+            document
+              .querySelectorAll('input[name="return_to_sender_postage"]')
+              .forEach((e) => {
+                e.checked = false;
+              });
+            $("#return_to_sender_postage_postageInput").val("");
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            show_alert("Failed to add returns...", "error");
+            $(".loader-container").addClass("d-none");
+          },
+        });
+      }
+      $("#return_to_senter_rts_reason").on("change", function (e) {
+        value = e.target.value;
+
+        if (value == "Other") {
+          $("#return_to_sender_rts_reason_other").prop("disabled", false);
+        } else {
+          $("#return_to_sender_rts_reason_other").val("");
+          $("#return_to_sender_rts_reason_other").prop("disabled", true);
+        }
+      });
+    </script>
+  </body>
+</html>
